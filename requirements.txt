@@ -1,26 +1,27 @@
-# Core packages
-numpy==1.21.6
-pandas==1.5.3
-tensorflow-cpu==2.10.0
-scikit-learn==1.0.2
+# Core Data Science Packages
+numpy==1.24.4  # Kept latest stable version
+pandas==2.1.4   # Maintained for compatibility
+scikit-learn==1.3.2  # Updated to latest stable
+SpeechRecognition==3.10.0
+PyAudio==0.2.13
+kaleido==0.2.1  # For static plot export
 
-# Dash ecosystem (updated versions)
-dash==3.0.4  # Updated to work with dash-bootstrap-components
-dash-bootstrap-components==2.0.3
-dash-core-components==2.0.0
-dash-html-components==2.0.0
-dash-table==5.0.0
-plotly==6.2.0
+# Visualization
+plotly==5.18.0  # Best version for Streamlit compatibility
+matplotlib==3.8.2  # Added for additional plotting options
 
-# Flask/backend
-Flask==2.2.0
-Werkzeug==2.2.0  # Specific version for Flask compatibility
+# Streamlit Ecosystem
+streamlit==1.29.0  # Current stable version
+streamlit-extras==1.0.1  # For additional UI components
+streamlit-aggrid==0.3.4  # Enhanced tables
 
-# ML frameworks (choose ONE)
-torch==2.0.1+cpu  # CPU-only version to reduce size
-# OR keep tensorflow-cpu (but not both)
+# Machine Learning (Choose ONE)
+tensorflow-cpu==2.10.0  # Lighter version for deployment
 
-# FastAPI
-fastapi==0.116.1
-uvicorn==0.35.0
-python-multipart==0.0.20
+# PDF/Reporting
+fpdf2==2.7.5  # For report generation
+qrcode==7.4.2  # For QR codes in reports
+
+# Optional Extras (Remove if not needed)
+python-dotenv==1.0.0  # For environment variables
+watchdog==3.0.0  # For file system monitoring
