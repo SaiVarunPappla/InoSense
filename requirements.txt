@@ -1,12 +1,26 @@
+# Core packages
 numpy==1.21.6
 pandas==1.5.3
 tensorflow-cpu==2.10.0
-dash==2.7.0
 scikit-learn==1.0.2
-Flask==2.2.0
-torch==2.0.1
-torchvision==0.15.2
+
+# Dash ecosystem (updated versions)
+dash==3.0.4  # Updated to work with dash-bootstrap-components
 dash-bootstrap-components==2.0.3
+dash-core-components==2.0.0
+dash-html-components==2.0.0
+dash-table==5.0.0
+plotly==6.2.0
+
+# Flask/backend
+Flask==2.2.0
+Werkzeug==2.2.0  # Specific version for Flask compatibility
+
+# ML frameworks (choose ONE)
+torch==2.0.1+cpu  # CPU-only version to reduce size
+# OR keep tensorflow-cpu (but not both)
+
+# FastAPI
 fastapi==0.116.1
 uvicorn==0.35.0
-python-multipart==0.0.20  # Corrected package name
+python-multipart==0.0.20
