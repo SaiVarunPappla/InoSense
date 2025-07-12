@@ -1,5 +1,5 @@
 # Core Data Science Packages
-numpy==1.26.4
+numpy==1.26.4  # Updated to compatible version
 pandas==2.1.4  # Maintained for compatibility
 scikit-learn==1.3.2  # Updated to latest stable
 SpeechRecognition==3.10.0
@@ -12,11 +12,8 @@ matplotlib==3.8.2  # Added for additional plotting options
 
 # Streamlit Ecosystem
 streamlit==1.29.0  # Current stable version
-streamlit-extras==1.0.1  # For additional UI components
 streamlit-aggrid==0.3.4  # Enhanced tables
 
-# Machine Learning (Choose ONE)
-tensorflow-cpu==2.10.0  # Lighter version for deployment
 
 # PDF/Reporting
 fpdf2==2.7.5  # For report generation
