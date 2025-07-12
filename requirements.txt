@@ -1,0 +1,15 @@
+numpy
+pandas
+tensorflow
+scikit-learn
+plotly
+dash
+dash-bootstrap-components
+fastapi
+uvicorn
+python-multipart
+websockets
+sounddevice
+SpeechRecognition
+fpdf
+qrcode
