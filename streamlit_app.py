@@ -132,13 +132,13 @@ with st.sidebar:
 
     ai_mode = st.selectbox("AI Model", ["Isolation Forest v2.0", "Predictive Model v3.0"], index=0)
     zoom_level = st.slider("3D Zoom Level", min_value=1.0, max_value=2.5, value=1.5, step=0.1)
-    refresh_rate = st.slider("Refresh Rate (seconds)", min_value=1, max_value 5, value=2, step=1)
+    refresh_rate = st.slider("Refresh Rate (seconds)", min_value=1, max_value=5, value=2, step=1)  # Fixed syntax error
 
     st.divider()
     st.markdown(f"""
     **Developed by:** Varun  
     **Version:** 2.5.0  
-    **Last Updated:** {datetime.now().strftime('%Y-%m-%d %H:%M IST')}  
+    **Last Updated:** {datetime.now().strftime('%Y-%m-%d %H:%M IST')}  # Updated to 2025-07-13 14:42 IST  
     **Links:** [GitHub](https://github.com/SaiVarunPappla) | [LinkedIn](https://www.linkedin.com/in/pappla-sai-varun-874902200/)  
     **Experience:** 2+ Years in AI Development, Cloud Deployment
     """)
@@ -422,5 +422,5 @@ st.divider()
 st.markdown("<h4 style='text-align: center; color: #ffffff;'>© 2025 InoSense AI | Pioneering Industrial Intelligence</h4>", unsafe_allow_html=True)
 st.caption("""
 Developed by Varun | Technologies: Python, Streamlit, Plotly, scikit-learn  
-[GitHub](https://github.com/SaiVarunPappla) | [LinkedIn](https://www.linkedin.com/in/pappla-sai-varun-874902200/)  
+[GitHub](https://github.com/SaiVarunPappla) | [LinkedIn](https://www.linkedin.com/in/pappla-sai-varun-874902200/)
 """)
