@@ -2,18 +2,9 @@ import os
 import tempfile
 from pathlib import Path
 
-# Override ALL Streamlit paths to use /tmp
 os.environ['STREAMLIT_SERVER_ROOT'] = tempfile.gettempdir()
+os.environ['STREAMLIT_CONFIG_DIR'] = str(Path(tempfile.gettempdir()) / '.streamlit')
 os.environ['STREAMLIT_GLOBAL_DEVELOPMENT_MODE'] = 'false'
-
-# Force config directory to a writable location
-config_path = Path(tempfile.gettempdir()) / '.streamlit'
-os.environ['STREAMLIT_CONFIG_DIR'] = str(config_path)
-config_path.mkdir(exist_ok=True)
-
-# Disable analytics and telemetry
-os.environ['STREAMLIT_BROWSER_GATHER_USAGE_STATS'] = 'false'
-os.environ['STREAMLIT_SERVER_ENABLE_STATIC_FILE_HANDLING'] = 'false'
 import streamlit as st
 import plotly.graph_objects as go
 import numpy as np
@@ -24,6 +15,8 @@ import base64
 from io import BytesIO
 from fpdf import FPDF
 import qrcode
+st.title("My App Works Now!")
+st.write("Hello from Hugging Face Spaces!")
 st.set_page_config(
     page_title="InoSense AI | Chemical Plant Monitor",
     page_icon="🏭",
