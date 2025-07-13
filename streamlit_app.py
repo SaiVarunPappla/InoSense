@@ -11,7 +11,6 @@ import base64
 from io import BytesIO
 from fpdf import FPDF
 import qrcode
-import tensorflow as tf
 from sklearn.ensemble import IsolationForest
 
 # Configure Streamlit environment
@@ -142,32 +141,25 @@ class PlantSimulator:
 
 plant = PlantSimulator()
 
-# Real-time metrics
-col1, col2, col3, col4 = st.columns(4)
-with col1:
-    st.metric("🌡️ Reactor Temp", f"{plant.state['temperature']:.1f}°K", f"{np.random.uniform(-2, 2):.1f}°C",
-              help="Real-time reactor temperature with AI monitoring")
-with col2:
-    st.metric("🔄 Flow Rate", f"{plant.state['flow_rate']:.1f} L/s", f"{np.random.uniform(-1, 1):.1f}%")
-with col3:
-    st.metric("⚡ Energy Usage", f"{plant.state['energy_usage']:.1f} MW", f"{np.random.uniform(-0.3, 0.3):.1f} MW")
-with col4:
-    st.metric("⚠️ Risk Level", f"{'High' if plant.state['risk_score'] > 70 else 'Medium' if plant.state['risk_score'] > 30 else 'Low'}",
-              f"{plant.state['risk_score']:.0f}%", delta_color="inverse")
-
-# AI Prediction Engine (Simplified)
+# AI Prediction Engine
 class AIPredictor:
     def __init__(self):
         self.model = IsolationForest(n_estimators=100, contamination=0.1)
-        self.scaler = self._initialize_scaler()
+        # Fit the model with initial synthetic data
+        self._fit_initial_model()
 
-    def _initialize_scaler(self):
-        return lambda x: (x - np.mean(x)) / np.std(x) if np.std(x) != 0 else x
+    def _fit_initial_model(self):
+        # Generate synthetic training data (e.g., 100 samples)
+        np.random.seed(42)
+        temp_data = np.random.normal(347, 10, 100)
+        flow_data = np.random.normal(42, 2, 100)
+        energy_data = np.random.normal(4.2, 0.1, 100)
+        training_data = np.column_stack((temp_data, flow_data, energy_data))
+        self.model.fit(training_data)
 
     def predict(self, state):
         features = np.array([state["temperature"], state["flow_rate"], state["energy_usage"]]).reshape(1, -1)
-        scaled_features = self.scaler(features)
-        anomaly_score = self.model.score_samples(scaled_features)[0]
+        anomaly_score = self.model.score_samples(features)[0]
         return {
             "risk_score": abs(anomaly_score) * 100,
             "is_anomaly": anomaly_score < -0.5,
@@ -183,6 +175,19 @@ class AIPredictor:
             return "NORMAL: Continue operations with routine checks"
 
 ai_predictor = AIPredictor()
+
+# Real-time metrics
+col1, col2, col3, col4 = st.columns(4)
+with col1:
+    st.metric("🌡️ Reactor Temp", f"{plant.state['temperature']:.1f}°K", f"{np.random.uniform(-2, 2):.1f}°C",
+              help="Real-time reactor temperature with AI monitoring")
+with col2:
+    st.metric("🔄 Flow Rate", f"{plant.state['flow_rate']:.1f} L/s", f"{np.random.uniform(-1, 1):.1f}%")
+with col3:
+    st.metric("⚡ Energy Usage", f"{plant.state['energy_usage']:.1f} MW", f"{np.random.uniform(-0.3, 0.3):.1f} MW")
+with col4:
+    st.metric("⚠️ Risk Level", f"{'High' if plant.state['risk_score'] > 70 else 'Medium' if plant.state['risk_score'] > 30 else 'Low'}",
+              f"{plant.state['risk_score']:.0f}%", delta_color="inverse")
 
 # Visualizations
 def create_risk_gauge(value):
@@ -276,6 +281,6 @@ st.experimental_rerun()
 # Footer
 st.divider()
 st.caption("""
-© 2025 InoSense AI | Built with Streamlit, TensorFlow, and Plotly  
+© 2025 InoSense AI | Built with Streamlit, scikit-learn, and Plotly  
 [GitHub](https://github.com/yourusername/inosense) | [Live Demo](your-app.streamlit.app) | [Contact](mailto:your.email@example.com)
 """)
