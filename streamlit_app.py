@@ -1,5 +1,10 @@
 import os
-os.environ['STREAMLIT_SERVER_ROOT'] = '/tmp'
+import tempfile
+
+# Set all Streamlit directories to temp locations
+os.environ['STREAMLIT_SERVER_ROOT'] = tempfile.gettempdir()
+os.environ['STREAMLIT_GLOBAL_DEVELOPMENT_MODE'] = 'false'
+os.environ['STREAMLIT_BROWSER_GATHER_USAGE_STATS'] = 'false'
 import streamlit as st
 import plotly.graph_objects as go
 import numpy as np
