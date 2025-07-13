@@ -15,8 +15,8 @@ import base64
 from io import BytesIO
 from fpdf import FPDF
 import qrcode
-st.title("My App Works Now!")
-st.write("Hello from Hugging Face Spaces!")
+st.title("My First App 🎈")
+st.write("Hello World! This is deployed on Vercel!")
 st.set_page_config(
     page_title="InoSense AI | Chemical Plant Monitor",
     page_icon="🏭",
