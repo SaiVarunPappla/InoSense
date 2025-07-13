@@ -25,7 +25,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for professional and engaging design
+# Custom CSS for professional design
 st.markdown("""
 <style>
 html, body, [class*="css"] {
@@ -42,10 +42,10 @@ body.light-mode {
 }
 
 .stMetric {
-    border-radius: 8px;
-    padding: 12px;
+    border-radius: 6px;
+    padding: 10px;
     background-color: #2e3a55;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: transform 0.2s ease;
 }
 body.light-mode .stMetric {
@@ -53,17 +53,17 @@ body.light-mode .stMetric {
     color: #333333;
 }
 .stMetric:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
 }
 
 .emergency-alert {
     background-color: #ff4444;
     color: #ffffff;
-    padding: 12px;
-    border-radius: 6px;
+    padding: 10px;
+    border-radius: 4px;
     text-align: center;
-    font-weight: bold;
+    font-weight: 600;
     animation: pulse 1.5s infinite;
 }
 
@@ -74,21 +74,21 @@ body.light-mode .stMetric {
 }
 
 .plot-container {
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     overflow: hidden;
     transition: transform 0.2s ease;
 }
 .plot-container:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .stButton>button {
     background-color: #4a90e2;
     color: #ffffff;
     border: none;
-    padding: 10px 20px;
+    padding: 8px 16px;
     border-radius: 4px;
     font-size: 1em;
     transition: background-color 0.2s ease;
@@ -138,10 +138,10 @@ with st.sidebar:
     st.divider()
     st.markdown(f"""
     **Developed by:** Varun  
-    **Version:** 2.6.0  
+    **Version:** 2.7.0  
     **Last Updated:** {datetime.now().strftime('%Y-%m-%d %H:%M IST')}  
     **Links:** [GitHub](https://github.com/SaiVarunPappla) | [LinkedIn](https://www.linkedin.com/in/pappla-sai-varun-874902200/)  
-    **Experience:** 2+ Years in AI/ML, Certified Cloud Practitioner
+    **Experience:** 2+ Years in AI/ML, Certified Cloud Architect
     """)
 
 # Main header
@@ -203,7 +203,7 @@ class AIPredictor:
                 "temperature": self._calculate_impact(state["temperature"], 347),
                 "flow_rate": self._calculate_impact(state["flow_rate"], 42),
                 "pressure": self._calculate_impact(state["pressure"], 15),
-                "efficiency": self._calculate_impact(100 - state["efficiency"], 15)  # Inverse efficiency impact
+                "efficiency": self._calculate_impact(100 - state["efficiency"], 15)
             }
         }
 
@@ -263,8 +263,8 @@ def create_3d_plant(state, zoom):
     fig.update_layout(
         scene=dict(xaxis_title='X-Axis', yaxis_title='Y-Axis', zaxis_title='Z-Axis',
                    camera=dict(eye=dict(x=zoom, y=zoom, z=zoom))),
-        margin=dict(l=0, r=0, b=0, t=40),
-        title="3D Plant Model with Contours"
+        margin=dict(l=20, r=20, b=20, t=40),
+        title="3D Plant Model with Thermal Contours"
     )
     return fig
 
@@ -283,7 +283,7 @@ def create_risk_gauge(value):
             'threshold': {'line': {'color': "black", 'width': 2}, 'thickness': 0.75, 'value': value}
         }
     ))
-    fig.update_layout(margin=dict(l=0, r=0, b=0, t=40), height=250)
+    fig.update_layout(margin=dict(l=20, r=20, b=20, t=40), height=250)
     return fig
 
 def create_risk_heatmap(prediction):
@@ -298,7 +298,7 @@ def create_risk_heatmap(prediction):
     ))
     fig.update_layout(
         title="Risk Factor Distribution",
-        margin=dict(l=0, r=0, b=0, t=40),
+        margin=dict(l=20, r=20, b=20, t=40),
         height=250
     )
     return fig
@@ -321,49 +321,57 @@ def create_multi_trend_chart(history):
     )
     return fig
 
-# Tab layout with enhanced details
-with st.tabs(["Live Monitoring", "AI Insights", "Reports & Trends"])[0]:  # Live Monitoring
-    st.subheader("Live Plant Monitoring Dashboard")
-    st.plotly_chart(create_3d_plant(plant.state, zoom_level), use_container_width=True)
+# Tab layout with detailed content
+tabs = st.tabs(["Live Monitoring", "AI Insights", "Reports & Trends"])
+
+with tabs[0]:  # Live Monitoring
+    st.subheader("Live Monitoring Dashboard")
+    st.plotly_chart(create_3d_plant(plant.state, zoom_level), use_container_width=True, key="live_3d_chart")
     if st.session_state.get('emergency', False):
         st.markdown('<div class="emergency-alert">Warning: Critical Failure Detected</div>', unsafe_allow_html=True)
         if 'emergency_time' in st.session_state and time.time() - st.session_state.emergency_time > 10:
             st.session_state.emergency = False
             del st.session_state.emergency_time
             st.success("Emergency resolved automatically.")
-    st.write("**Real-Time Overview:** Monitor the 3D plant model with dynamic updates reflecting temperature, pressure, and risk levels. Use the zoom slider to explore critical zones.")
+    update_display()  # Ensure metrics update
+    st.write("""
+    **Live Monitoring Overview:**  
+    This dashboard provides a real-time 3D representation of the chemical plant, highlighting thermal contours and core temperature. The model updates dynamically based on sensor data, including temperature, pressure, and risk levels. Use the zoom slider to focus on critical areas, and monitor the metrics below for immediate insights into plant performance.  
+    - **Key Metrics:** Temperature (critical above 360°K), Pressure (stable 14-16 bar), Risk Score (action required above 70%).  
+    - **Operational Tip:** Adjust zoom to inspect potential hotspots indicated by red markers.
+    """)
 
-with st.tabs(["Live Monitoring", "AI Insights", "Reports & Trends"])[1]:  # AI Insights
+with tabs[1]:  # AI Insights
     st.subheader("AI-Driven Process Insights")
     prediction = ai_predictor.predict(plant.state)
     col1, col2, col3 = st.columns([2, 2, 3])
     with col1:
-        st.plotly_chart(create_risk_gauge(prediction["risk_score"]), use_container_width=True)
+        st.plotly_chart(create_risk_gauge(prediction["risk_score"]), use_container_width=True, key="risk_gauge")
     with col2:
-        st.plotly_chart(create_risk_heatmap(prediction), use_container_width=True)
+        st.plotly_chart(create_risk_heatmap(prediction), use_container_width=True, key="risk_heatmap")
     with col3:
-        st.plotly_chart(create_multi_trend_chart(plant.history.tail(20)), use_container_width=True)
+        st.plotly_chart(create_multi_trend_chart(plant.history.tail(20)), use_container_width=True, key="trend_chart")
     st.info(f"""
     **Action Plan:** {prediction["recommendation"]}  
     - Anomaly Status: {prediction['is_anomaly']}  
     - Confidence Level: {min(95, max(50, 100 - prediction['risk_score'])):.0f}%  
-    - Impact Analysis:  
-      - Temperature Deviation: {prediction['impacts']['temperature']:.1f}%  
-      - Flow Rate Variation: {prediction['impacts']['flow_rate']:.1f}%  
-      - Pressure Deviation: {prediction['impacts']['pressure']:.1f}%  
-      - Efficiency Impact: {prediction['impacts']['efficiency']:.1f}%  
-    **Recommendations:**  
-    - Adjust temperature controls if deviation > 5%.  
-    - Stabilize flow rate if variation exceeds 10%.  
-    - Inspect pressure systems for anomalies.  
-    - Optimize efficiency with predictive maintenance.  
+    - **Impact Analysis:**  
+      - Temperature Deviation: {prediction['impacts']['temperature']:.1f}% (Threshold: 5%)  
+      - Flow Rate Variation: {prediction['impacts']['flow_rate']:.1f}% (Threshold: 10%)  
+      - Pressure Deviation: {prediction['impacts']['pressure']:.1f}% (Threshold: 5%)  
+      - Efficiency Impact: {prediction['impacts']['efficiency']:.1f}% (Target: <15%)  
+    **Detailed Recommendations:**  
+    - **Temperature:** Adjust cooling systems if deviation exceeds 5%.  
+    - **Flow Rate:** Stabilize pumps if variation surpasses 10%.  
+    - **Pressure:** Inspect seals if deviation exceeds 5% for 3+ cycles.  
+    - **Efficiency:** Schedule predictive maintenance if impact exceeds 15%.  
     """)
-    if st.button("Execute Optimization", use_container_width=True):
+    if st.button("Execute Optimization", use_container_width=True, key="optimize_button"):
         with st.spinner("Running optimization algorithm..."):
             time.sleep(1.5)
             st.success(f"Optimization successful! Efficiency improved by {np.random.uniform(10, 20):.1f}%.")
 
-with st.tabs(["Live Monitoring", "AI Insights", "Reports & Trends"])[2]:  # Reports & Trends
+with tabs[2]:  # Reports & Trends
     st.subheader("Reports & Comprehensive Trends")
     def generate_report():
         pdf = FPDF()
@@ -385,7 +393,8 @@ with st.tabs(["Live Monitoring", "AI Insights", "Reports & Trends"])[2]:  # Repo
         label="Download Detailed Report (PDF)",
         data=generate_report(),
         file_name=f"inosense_report_{datetime.now().strftime('%Y%m%d_%H%M')}.pdf",
-        mime="application/pdf"
+        mime="application/pdf",
+        key="pdf_download"
     )
 
     def export_data():
@@ -396,29 +405,31 @@ with st.tabs(["Live Monitoring", "AI Insights", "Reports & Trends"])[2]:  # Repo
         label="Export Historical Data (CSV)",
         data=export_data(),
         file_name=f"inosense_data_{datetime.now().strftime('%Y%m%d_%H%M')}.csv",
-        mime="text/csv"
+        mime="text/csv",
+        key="csv_download"
     )
 
     st.subheader("Comprehensive Trend Analysis")
     fig = create_multi_trend_chart(plant.history)
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, key="trend_plot")
     st.write("""
-    **Trend Insights:**  
-    - Temperature trends indicate process stability or anomalies over time.  
-    - Flow rate variations may suggest pump performance issues.  
-    - Risk score trends help predict potential failures.  
-    - Pressure and efficiency metrics guide maintenance schedules.  
-    **Analysis Tip:** Use the exported CSV for in-depth statistical modeling.
+    **Trend Analysis Overview:**  
+    This section tracks smoothed trends across key parameters to identify patterns and anomalies.  
+    - **Temperature (°K):** Indicates thermal stability; spikes suggest overheating risks.  
+    - **Flow Rate (L/s):** Variations may signal pump or valve issues.  
+    - **Risk Score (%):** Rising trends warrant immediate action above 70%.  
+    - **Pressure (bar):** Consistent deviations may indicate leaks or blockages.  
+    - **Efficiency (%):** Declines below 80% suggest maintenance needs.  
+    **Usage Guide:** Export data for advanced statistical analysis or machine learning model training to predict future performance.
     """)
 
-# Real-time update with rerun
+# Real-time update with session state
 if 'last_update' not in st.session_state:
     st.session_state.last_update = time.time()
 
 if time.time() - st.session_state.last_update > refresh_rate:
     update_display()
     st.session_state.last_update = time.time()
-    st.rerun()  # Updated from experimental_rerun
 
 # Reset emergency on page load if timed out
 if 'emergency' in st.session_state and 'emergency_time' in st.session_state:
