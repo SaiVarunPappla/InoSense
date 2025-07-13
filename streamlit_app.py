@@ -11,7 +11,6 @@ from io import BytesIO
 from fpdf import FPDF
 import qrcode
 from sklearn.ensemble import IsolationForest
-import streamlit.components.v1 as components
 
 # Configure Streamlit environment
 os.environ['STREAMLIT_SERVER_ROOT'] = tempfile.gettempdir()
@@ -20,13 +19,13 @@ os.environ['STREAMLIT_GLOBAL_DEVELOPMENT_MODE'] = 'false'
 
 # Page configuration
 st.set_page_config(
-    page_title="InoSense AI | Industrial Process Monitor",
+    page_title="InoSense | Smart Monitoring of Chemical Processes",
     page_icon="🏭",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for professional design
+# Custom CSS for professional and engaging design
 st.markdown("""
 <style>
 html, body, [class*="css"] {
@@ -55,6 +54,13 @@ html, body, [class*="css"] {
     border-radius: 8px;
     text-align: center;
     font-weight: bold;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
 }
 
 .plot-container {
@@ -80,6 +86,11 @@ html, body, [class*="css"] {
 .stButton>button:hover {
     background-color: #357abd;
 }
+
+.stTabs [data-baseweb="tab-list"] {
+    background-color: #2e3a55;
+    border-radius: 5px;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -99,25 +110,27 @@ with st.sidebar:
 
     ai_mode = st.selectbox("AI Model", ["Isolation Forest v2.0", "Predictive Model v3.0"], index=0)
     zoom_level = st.slider("3D Zoom Level", min_value=1.0, max_value=2.0, value=1.5, step=0.1)
+    refresh_rate = st.slider("Refresh Rate (seconds)", min_value=1, max_value=5, value=2, step=1)
 
     st.divider()
     st.markdown(f"""
     **Developed by:** Varun  
-    **Version:** 2.2.0  
+    **Version:** 2.3.0  
     **Last Updated:** {datetime.now().strftime('%Y-%m-%d %H:%M IST')}  
     **Links:** [GitHub](https://github.com/SaiVarunPappla) | [LinkedIn](https://www.linkedin.com/in/pappla-sai-varun-874902200/)  
-    **Credentials:** AWS Certified, AI/ML Training
+    **Credentials:** AWS Certified, 2+ Years in AI Development
     """)
 
 # Main header
-st.header("InoSense AI | Industrial Process Monitor")
-st.caption("Real-time monitoring and optimization for chemical plants")
+st.header("InoSense | Smart Monitoring of Chemical Processes")
+st.caption("Real-time analytics and optimization for industrial efficiency")
 
-# Plant simulator with data history
+# Plant simulator with progress tracking
 class PlantSimulator:
     def __init__(self):
         self.state = {"temperature": 347.0, "flow_rate": 42.0, "energy_usage": 4.2, "risk_score": 45.0}
         self.history = pd.DataFrame(columns=["time", "temperature", "flow_rate", "energy_usage", "risk_score"])
+        self.progress = 0.0  # Initialize as 0.0-1.0
 
     def update(self):
         t = time.time()
@@ -125,6 +138,7 @@ class PlantSimulator:
         self.state["flow_rate"] = 42 + 2 * np.cos(t * 0.15) + np.random.normal(0, 0.7)
         self.state["energy_usage"] = 4.2 - 0.1 * np.sin(t * 0.2) + np.random.normal(0, 0.05)
         self.state["risk_score"] = min(100, max(0, 45 + 15 * np.random.normal(0, 1)))
+        self.progress = min(1.0, self.progress + np.random.uniform(0.005, 0.01))  # Gradual progress 0.0-1.0
         self.history.loc[len(self.history)] = [datetime.now(), *self.state.values()]
         return self.state
 
@@ -163,9 +177,12 @@ class AIPredictor:
 
 ai_predictor = AIPredictor()
 
-# Real-time metrics
+# Real-time metrics with session state
 metrics_container = st.empty()
-def update_metrics():
+progress_container = st.empty()
+
+def update_display():
+    plant.update()
     with metrics_container.container():
         col1, col2, col3, col4 = st.columns(4)
         with col1:
@@ -176,6 +193,8 @@ def update_metrics():
             st.metric("Energy Usage", f"{plant.state['energy_usage']:.1f} MW", f"{np.random.uniform(-0.3, 0.3):.1f} MW")
         with col4:
             st.metric("Risk Level", f"{plant.state['risk_score']:.0f}%", delta_color="inverse")
+    with progress_container.container():
+        st.progress(plant.progress)
 
 # Enhanced 3D visualization
 def create_3d_plant(state, zoom):
@@ -214,12 +233,12 @@ def create_risk_gauge(value):
     return fig
 
 # Tab layout
-tab1, tab2, tab3 = st.tabs(["Live Monitoring", "AI Insights", "Reports"])
+tab1, tab2, tab3 = st.tabs(["Live Monitoring", "AI Insights", "Reports & Trends"])
 
 with tab1:
     st.subheader("Live Plant Monitoring")
     st.plotly_chart(create_3d_plant(plant.state, zoom_level), use_container_width=True)
-    if st.session_state.get('emergency'):
+    if st.session_state.get('emergency', False):
         st.markdown('<div class="emergency-alert">Warning: Critical Failure Detected</div>', unsafe_allow_html=True)
 
 with tab2:
@@ -240,7 +259,7 @@ with tab2:
                 st.success(f"Optimization complete! Saved {np.random.uniform(10, 20):.1f}% energy")
 
 with tab3:
-    st.subheader("Operational Reports")
+    st.subheader("Reports & Trends")
     def generate_report():
         pdf = FPDF()
         pdf.add_page()
@@ -263,7 +282,6 @@ with tab3:
         mime="application/pdf"
     )
 
-    # Add trend visualization
     st.subheader("Historical Trends")
     fig = go.Figure()
     fig.add_trace(go.Scatter(y=plant.history["temperature"], mode='lines', name='Temperature'))
@@ -276,17 +294,13 @@ with tab3:
     )
     st.plotly_chart(fig, use_container_width=True)
 
-# Real-time streaming with fixed progress
-def stream_data():
-    while True:
-        plant.update()
-        update_metrics()
-        st.progress(plant.progress / 100)  # Normalize progress to 0.0-1.0
-        time.sleep(2)  # Update every 2 seconds
+# Real-time update with session state
+if 'last_update' not in st.session_state:
+    st.session_state.last_update = time.time()
 
-# Start streaming
-if __name__ == "__main__":
-    stream_data()
+if time.time() - st.session_state.last_update > refresh_rate:
+    update_display()
+    st.session_state.last_update = time.time()
 
 # Footer
 st.divider()
