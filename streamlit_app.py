@@ -1,10 +1,19 @@
 import os
 import tempfile
+from pathlib import Path
 
-# Set all Streamlit directories to temp locations
+# Override ALL Streamlit paths to use /tmp
 os.environ['STREAMLIT_SERVER_ROOT'] = tempfile.gettempdir()
 os.environ['STREAMLIT_GLOBAL_DEVELOPMENT_MODE'] = 'false'
+
+# Force config directory to a writable location
+config_path = Path(tempfile.gettempdir()) / '.streamlit'
+os.environ['STREAMLIT_CONFIG_DIR'] = str(config_path)
+config_path.mkdir(exist_ok=True)
+
+# Disable analytics and telemetry
 os.environ['STREAMLIT_BROWSER_GATHER_USAGE_STATS'] = 'false'
+os.environ['STREAMLIT_SERVER_ENABLE_STATIC_FILE_HANDLING'] = 'false'
 import streamlit as st
 import plotly.graph_objects as go
 import numpy as np
