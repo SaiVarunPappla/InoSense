@@ -18,10 +18,12 @@ Automated Reporting: Generates PDF reports with QR codes for traceability.
 
 Tech Stack :
 
-=======
-InoSense: Smart Monitoring of CHemical Processes
-[Dashboard1](assets/l1.png) [Dashboard2](assets/l2.png) [Dashboard3](assets/l3.png)
-A sophisticated AI-driven solution for real-time chemical process monitoring and optimization.
+Frontend: Dash, Plotly, Dash Bootstrap Components
+Backend: FastAPI, WebSockets, Uvicorn
+AI/ML: TensorFlow, scikit-learn, LSTM, MultiHeadAttention
+Data Handling: pandas, numpy, qrcode, fpdf
+Voice: speech_recognition, pyaudio
+Security: Custom blockchain implementation
 
 Overview:
 InoSense is a full-stack AI/ML-powered industrial monitoring system designed to enhance chemical plant management. It features a 4D digital twin, predictive maintenance, anomaly detection, voice control, blockchain data integrity, and a multi-user dashboard with automated reporting. Built using Python, TensorFlow, Dash, and FastAPI, InoSense provides real-time insights and optimizes operational efficiency.
