@@ -25,14 +25,20 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for professional and engaging design
+# Custom CSS for professional design
 st.markdown("""
 <style>
 html, body, [class*="css"] {
     font-family: 'Arial', 'Helvetica', sans-serif;
     background-color: #1e2a44;
     color: #ffffff;
+    transition: all 0.3s ease;
     overflow-x: hidden;
+}
+
+body.light-mode {
+    background-color: #f0f4f8;
+    color: #333333;
 }
 
 .stMetric {
@@ -41,6 +47,10 @@ html, body, [class*="css"] {
     background-color: #2e3a55;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     transition: transform 0.3s ease;
+}
+body.light-mode .stMetric {
+    background-color: #e0e7f0;
+    color: #333333;
 }
 .stMetric:hover {
     transform: translateY(-5px);
@@ -86,10 +96,18 @@ html, body, [class*="css"] {
 .stButton>button:hover {
     background-color: #357abd;
 }
+body.light-mode .stButton>button {
+    background-color: #6ba4e7;
+}
+body.light-mode .stButton>button:hover {
+    background-color: #4682b4;
+}
 
 .stTabs [data-baseweb="tab-list"] {
     background-color: #2e3a55;
-    border-radius: 5px;
+}
+body.light-mode .stTabs [data-baseweb="tab-list"] {
+    background-color: #d0d9e3;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -97,28 +115,34 @@ html, body, [class*="css"] {
 # Sidebar with controls
 with st.sidebar:
     st.header("Control Panel")
-    dark_mode = st.toggle("Light Mode", False)
-    if dark_mode:
-        st.markdown("<style>body {background-color: #f0f4f8; color: #333333;}</style>", unsafe_allow_html=True)
+    if 'dark_mode' not in st.session_state:
+        st.session_state.dark_mode = False
+    dark_mode = st.toggle("Light Mode", st.session_state.dark_mode, key="dark_mode_toggle")
+    st.session_state.dark_mode = not dark_mode
+    if st.session_state.dark_mode:
+        st.markdown("<body class='light-mode'>", unsafe_allow_html=True)
     else:
-        st.markdown("<style>body {background-color: #1e2a44; color: #ffffff;}</style>", unsafe_allow_html=True)
+        st.markdown("<body>", unsafe_allow_html=True)
 
     emergency = st.button("Trigger Emergency", help="Simulate a critical failure", use_container_width=True)
-    if emergency:
+    if emergency and 'emergency_time' not in st.session_state:
         st.session_state.emergency = True
+        st.session_state.emergency_time = time.time()
         st.toast("Emergency triggered!", icon="⚠️")
 
     ai_mode = st.selectbox("AI Model", ["Isolation Forest v2.0", "Predictive Model v3.0"], index=0)
     zoom_level = st.slider("3D Zoom Level", min_value=1.0, max_value=2.0, value=1.5, step=0.1)
     refresh_rate = st.slider("Refresh Rate (seconds)", min_value=1, max_value=5, value=2, step=1)
+    if st.button("Update Data", use_container_width=True):
+        update_display()
 
     st.divider()
     st.markdown(f"""
     **Developed by:** Varun  
-    **Version:** 2.3.0  
+    **Version:** 2.4.0  
     **Last Updated:** {datetime.now().strftime('%Y-%m-%d %H:%M IST')}  
     **Links:** [GitHub](https://github.com/SaiVarunPappla) | [LinkedIn](https://www.linkedin.com/in/pappla-sai-varun-874902200/)  
-    **Credentials:** AWS Certified, 2+ Years in AI Development
+    **Experience:** 2+ Years in AI Development, Cloud Deployment
     """)
 
 # Main header
@@ -164,16 +188,22 @@ class AIPredictor:
         return {
             "risk_score": abs(anomaly_score) * 100,
             "is_anomaly": anomaly_score < -0.6,
-            "recommendation": self._get_recommendation(abs(anomaly_score))
+            "recommendation": self._get_recommendation(abs(anomaly_score)),
+            "temperature_impact": self._calculate_impact(state["temperature"]),
+            "flow_impact": self._calculate_impact(state["flow_rate"])
         }
 
     def _get_recommendation(self, anomaly_score):
         if anomaly_score > 1.8:
-            return "Critical: Immediate shutdown required"
+            return "Critical: Immediate shutdown and inspection recommended"
         elif anomaly_score > 1.2:
-            return "Warning: Schedule maintenance"
+            return "Warning: Adjust parameters and schedule review"
         else:
-            return "Normal: Continue operations"
+            return "Normal: Maintain current operations with routine checks"
+
+    def _calculate_impact(self, value):
+        baseline = {"temperature": 347, "flow_rate": 42}
+        return abs(value - baseline.get(value)) / baseline.get(value) * 100 if value in baseline else 0
 
 ai_predictor = AIPredictor()
 
@@ -232,6 +262,23 @@ def create_risk_gauge(value):
     fig.update_layout(margin=dict(l=0, r=0, b=0, t=30), height=250)
     return fig
 
+def create_risk_heatmap(prediction):
+    fig = go.Figure(data=go.Heatmap(
+        z=[[prediction["risk_score"], prediction["temperature_impact"]],
+           [prediction["flow_impact"], 100 - prediction["risk_score"]]],
+        x=['Risk Score', 'Temp Impact'],
+        y=['Flow Impact', 'Stability'],
+        colorscale='RdYlGn',
+        zmin=0, zmax=100,
+        hovertemplate="%{x}: %{z:.1f}%<extra></extra>"
+    ))
+    fig.update_layout(
+        title="Risk Distribution Heatmap",
+        margin=dict(l=0, r=0, b=0, t=30),
+        height=250
+    )
+    return fig
+
 # Tab layout
 tab1, tab2, tab3 = st.tabs(["Live Monitoring", "AI Insights", "Reports & Trends"])
 
@@ -240,6 +287,10 @@ with tab1:
     st.plotly_chart(create_3d_plant(plant.state, zoom_level), use_container_width=True)
     if st.session_state.get('emergency', False):
         st.markdown('<div class="emergency-alert">Warning: Critical Failure Detected</div>', unsafe_allow_html=True)
+        if 'emergency_time' in st.session_state and time.time() - st.session_state.emergency_time > 10:
+            st.session_state.emergency = False
+            del st.session_state.emergency_time
+            st.success("Emergency resolved automatically.")
 
 with tab2:
     st.subheader("AI-Powered Insights")
@@ -248,15 +299,19 @@ with tab2:
     with col1:
         st.plotly_chart(create_risk_gauge(prediction["risk_score"]), use_container_width=True)
     with col2:
+        st.plotly_chart(create_risk_heatmap(prediction), use_container_width=True)
         st.info(f"""
-        **Recommendation:** {prediction["recommendation"]}  
-        - Anomaly Detected: {prediction['is_anomaly']}  
-        - Confidence Level: {min(95, max(50, 100 - prediction['risk_score'])):.0f}%
+        **Action Plan:** {prediction["recommendation"]}  
+        - Anomaly Status: {prediction['is_anomaly']}  
+        - Confidence Level: {min(95, max(50, 100 - prediction['risk_score'])):.0f}%  
+        - Temperature Deviation: {prediction['temperature_impact']:.1f}%  
+        - Flow Rate Impact: {prediction['flow_impact']:.1f}%  
+        **Next Steps:** Review logs for detailed analysis and implement adjustments.
         """)
         if st.button("Optimize Parameters", use_container_width=True):
-            with st.spinner("Optimizing system..."):
+            with st.spinner("Optimizing system parameters..."):
                 time.sleep(1.5)
-                st.success(f"Optimization complete! Saved {np.random.uniform(10, 20):.1f}% energy")
+                st.success(f"Optimization complete! Energy savings: {np.random.uniform(10, 20):.1f}%")
 
 with tab3:
     st.subheader("Reports & Trends")
@@ -283,29 +338,36 @@ with tab3:
     )
 
     st.subheader("Historical Trends")
+    # Smooth data with moving average
+    window_size = 5
+    smoothed_temp = plant.history["temperature"].rolling(window=window_size, min_periods=1).mean()
+    smoothed_risk = plant.history["risk_score"].rolling(window=window_size, min_periods=1).mean()
+    smoothed_flow = plant.history["flow_rate"].rolling(window=window_size, min_periods=1).mean()
+
     fig = go.Figure()
-    fig.add_trace(go.Scatter(y=plant.history["temperature"], mode='lines', name='Temperature'))
-    fig.add_trace(go.Scatter(y=plant.history["risk_score"], mode='lines', name='Risk Score'))
+    fig.add_trace(go.Scatter(y=smoothed_temp, mode='lines', name='Temperature (°K)', line=dict(color='#1f77b4')))
+    fig.add_trace(go.Scatter(y=smoothed_risk, mode='lines', name='Risk Score (%)', line=dict(color='#ff7f0e')))
+    fig.add_trace(go.Scatter(y=smoothed_flow, mode='lines', name='Flow Rate (L/s)', line=dict(color='#2ca02c')))
     fig.update_layout(
         xaxis_title="Time",
         yaxis_title="Value",
-        title="Trend Analysis",
-        template="plotly_dark"
+        title="Smoothed Trend Analysis",
+        template="plotly_dark",
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        margin=dict(l=40, r=40, t=40, b=40)
     )
     st.plotly_chart(fig, use_container_width=True)
 
-# Real-time update with session state
-if 'last_update' not in st.session_state:
-    st.session_state.last_update = time.time()
-
-if time.time() - st.session_state.last_update > refresh_rate:
-    update_display()
-    st.session_state.last_update = time.time()
+# Reset emergency on page load if timed out
+if 'emergency' in st.session_state and 'emergency_time' in st.session_state:
+    if time.time() - st.session_state.emergency_time > 10:
+        st.session_state.emergency = False
+        del st.session_state.emergency_time
 
 # Footer
 st.divider()
 st.markdown("<h4 style='text-align: center; color: #ffffff;'>© 2025 InoSense AI | Advanced Industrial Solutions</h4>", unsafe_allow_html=True)
 st.caption("""
 Developed by Varun | Technologies: Python, Streamlit, Plotly, scikit-learn  
-[GitHub](https://github.com/SaiVarunPappla) | [LinkedIn](https://www.linkedin.com/in/pappla-sai-varun-874902200/)  
+[GitHub](https://github.com/SaiVarunPappla) | [LinkedIn](https://www.linkedin.com/in/pappla-sai-varun-874902200/)
 """)
