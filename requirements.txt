@@ -1,4 +1,2 @@
-# Minimal working setup
 streamlit==1.17.0
-numpy==1.22.4  # Last version with Python 3.10 support
-pandas==1.4.2
+numpy==1.21.6

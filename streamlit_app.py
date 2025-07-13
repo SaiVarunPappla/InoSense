@@ -1,3 +1,5 @@
+import os
+os.environ['STREAMLIT_SERVER_ROOT'] = '/tmp'
 import streamlit as st
 import plotly.graph_objects as go
 import numpy as np
