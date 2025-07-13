@@ -1,3 +1,6 @@
-streamlit==1.32.0
-numpy==1.26.0
-pandas==2.1.0 --only-binary=:all:  # Force pre-built version
+streamlit
+plotly
+numpy
+pandas
+fpdf
+qrcode
