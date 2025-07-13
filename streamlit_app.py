@@ -42,10 +42,10 @@ body.light-mode {
 }
 
 .stMetric {
-    border-radius: 6px;
-    padding: 10px;
+    border-radius: 5px;
+    padding: 8px;
     background-color: #2e3a55;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     transition: transform 0.2s ease;
 }
 body.light-mode .stMetric {
@@ -53,15 +53,15 @@ body.light-mode .stMetric {
     color: #333333;
 }
 .stMetric:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .emergency-alert {
     background-color: #ff4444;
     color: #ffffff;
-    padding: 10px;
-    border-radius: 4px;
+    padding: 8px;
+    border-radius: 3px;
     text-align: center;
     font-weight: 600;
     animation: pulse 1.5s infinite;
@@ -69,19 +69,19 @@ body.light-mode .stMetric {
 
 @keyframes pulse {
     0% { transform: scale(1); }
-    50% { transform: scale(1.02); }
+    50% { transform: scale(1.01); }
     100% { transform: scale(1); }
 }
 
 .plot-container {
-    border-radius: 6px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     overflow: hidden;
     transition: transform 0.2s ease;
 }
 .plot-container:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .stButton>button {
@@ -89,8 +89,8 @@ body.light-mode .stMetric {
     color: #ffffff;
     border: none;
     padding: 8px 16px;
-    border-radius: 4px;
-    font-size: 1em;
+    border-radius: 3px;
+    font-size: 0.95em;
     transition: background-color 0.2s ease;
 }
 .stButton>button:hover {
@@ -105,7 +105,7 @@ body.light-mode .stButton>button:hover {
 
 .stTabs [data-baseweb="tab-list"] {
     background-color: #2e3a55;
-    border-radius: 4px;
+    border-radius: 3px;
 }
 body.light-mode .stTabs [data-baseweb="tab-list"] {
     background-color: #d0d9e3;
@@ -138,17 +138,17 @@ with st.sidebar:
     st.divider()
     st.markdown(f"""
     **Developed by:** Varun  
-    **Version:** 2.7.0  
+    **Version:** 2.8.0  
     **Last Updated:** {datetime.now().strftime('%Y-%m-%d %H:%M IST')}  
     **Links:** [GitHub](https://github.com/SaiVarunPappla) | [LinkedIn](https://www.linkedin.com/in/pappla-sai-varun-874902200/)  
-    **Experience:** 2+ Years in AI/ML, Certified Cloud Architect
+    **Experience:** 2+ Years in AI/ML, Certified Cloud Architect, Published Researcher
     """)
 
 # Main header
 st.header("InoSense | Smart Monitoring of Chemical Processes")
 st.caption("Advanced real-time analytics and optimization for industrial efficiency")
 
-# Plant simulator with dynamic parameters
+# Plant simulator with dynamic parameters and logs
 class PlantSimulator:
     def __init__(self):
         self.state = {
@@ -161,6 +161,7 @@ class PlantSimulator:
             "pressure", "vibration", "efficiency"
         ])
         self.progress = 0.0
+        self.logs = []
 
     def update(self):
         t = time.time()
@@ -173,11 +174,12 @@ class PlantSimulator:
         self.state["efficiency"] = max(50, min(95, 85 + 5 * np.cos(t * 0.1) + np.random.normal(0, 2)))
         self.progress = min(1.0, self.progress + np.random.uniform(0.005, 0.01))
         self.history.loc[len(self.history)] = [datetime.now(), *self.state.values()]
+        self.logs.append(f"{datetime.now().strftime('%H:%M:%S')}: Updated - Temp: {self.state['temperature']:.1f}°K, Risk: {self.state['risk_score']:.0f}%")
         return self.state
 
 plant = PlantSimulator()
 
-# AI predictor with detailed analysis
+# AI predictor with predictive alerts
 class AIPredictor:
     def __init__(self):
         self.model = IsolationForest(n_estimators=200, contamination=0.1)
@@ -195,28 +197,37 @@ class AIPredictor:
     def predict(self, state):
         features = np.array([state["temperature"], state["flow_rate"], state["energy_usage"], state["pressure"]]).reshape(1, -1)
         anomaly_score = self.model.score_samples(features)[0]
+        risk_score = abs(anomaly_score) * 100
         return {
-            "risk_score": abs(anomaly_score) * 100,
+            "risk_score": risk_score,
             "is_anomaly": anomaly_score < -0.6,
-            "recommendation": self._get_recommendation(abs(anomaly_score)),
+            "recommendation": self._get_recommendation(risk_score),
             "impacts": {
                 "temperature": self._calculate_impact(state["temperature"], 347),
                 "flow_rate": self._calculate_impact(state["flow_rate"], 42),
                 "pressure": self._calculate_impact(state["pressure"], 15),
                 "efficiency": self._calculate_impact(100 - state["efficiency"], 15)
-            }
+            },
+            "predictive_alert": self._generate_predictive_alert(risk_score, state)
         }
 
-    def _get_recommendation(self, anomaly_score):
-        if anomaly_score > 1.8:
+    def _get_recommendation(self, risk_score):
+        if risk_score > 1.8:
             return "Critical: Immediate shutdown and inspection required"
-        elif anomaly_score > 1.2:
+        elif risk_score > 1.2:
             return "Warning: Adjust parameters and schedule maintenance"
         else:
             return "Optimal: Maintain current operations"
 
     def _calculate_impact(self, value, baseline):
         return abs(value - baseline) / baseline * 100
+
+    def _generate_predictive_alert(self, risk_score, state):
+        if risk_score > 70 and state["temperature"] > 355:
+            return "Predictive Alert: Potential overheating in 2-3 cycles. Initiate cooling."
+        elif risk_score > 60 and state["pressure"] > 16:
+            return "Predictive Alert: Pressure buildup detected. Check seals."
+        return "No predictive alerts at this time."
 
 ai_predictor = AIPredictor()
 
@@ -245,26 +256,24 @@ def update_display():
     with progress_container.container():
         st.progress(plant.progress)
 
-# Enhanced 3D visualization with annotations and contours
+# Professional 3D visualization
 def create_3d_plant(state, zoom):
-    x, y = np.meshgrid(np.linspace(0, 10, 40), np.linspace(0, 10, 40))
-    z = np.sin(x) * np.cos(y) * (state["temperature"] / 500) + np.random.normal(0, 0.1, (40, 40))
-    fig = go.Figure(data=[
-        go.Surface(z=z, colorscale='Viridis', opacity=0.8, showscale=False),
-        go.Contour(z=z, colorscale='Viridis', showscale=False, contours=dict(start=0, end=1, size=0.1))
-    ])
+    x, y = np.meshgrid(np.linspace(0, 10, 30), np.linspace(0, 10, 30))
+    z = np.sin(x) * np.cos(y) * (state["temperature"] / 500)
+    fig = go.Figure(data=[go.Surface(z=z, colorscale='Blues', opacity=0.7, showscale=False)])
     fig.add_trace(go.Scatter3d(
-        x=[5], y=[5], z=[z[20, 20]], mode='markers+text',
-        marker=dict(size=10, color='red'),
+        x=[5], y=[5], z=[z[15, 15]], mode='markers+text',
+        marker=dict(size=8, color='red'),
         text=[f"Temp: {state['temperature']:.1f}°K"],
         textposition="top center",
         hovertemplate="Core Temp: %{z:.1f}°K<extra></extra>"
     ))
     fig.update_layout(
         scene=dict(xaxis_title='X-Axis', yaxis_title='Y-Axis', zaxis_title='Z-Axis',
-                   camera=dict(eye=dict(x=zoom, y=zoom, z=zoom))),
+                   camera=dict(eye=dict(x=zoom, y=zoom, z=zoom)), xaxis=dict(showgrid=False), yaxis=dict(showgrid=False), zaxis=dict(showgrid=False)),
         margin=dict(l=20, r=20, b=20, t=40),
-        title="3D Plant Model with Thermal Contours"
+        title="3D Plant Thermal Profile",
+        template="plotly_white"
     )
     return fig
 
@@ -283,7 +292,7 @@ def create_risk_gauge(value):
             'threshold': {'line': {'color': "black", 'width': 2}, 'thickness': 0.75, 'value': value}
         }
     ))
-    fig.update_layout(margin=dict(l=20, r=20, b=20, t=40), height=250)
+    fig.update_layout(margin=dict(l=20, r=20, b=20, t=40), height=250, template="plotly_white")
     return fig
 
 def create_risk_heatmap(prediction):
@@ -299,7 +308,8 @@ def create_risk_heatmap(prediction):
     fig.update_layout(
         title="Risk Factor Distribution",
         margin=dict(l=20, r=20, b=20, t=40),
-        height=250
+        height=250,
+        template="plotly_white"
     )
     return fig
 
@@ -314,7 +324,7 @@ def create_multi_trend_chart(history):
         xaxis_title="Time",
         yaxis_title="Value",
         title="Multi-Parameter Trend Analysis",
-        template="plotly_dark",
+        template="plotly_white",
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
         margin=dict(l=40, r=40, t=40, b=40),
         height=400
@@ -333,12 +343,12 @@ with tabs[0]:  # Live Monitoring
             st.session_state.emergency = False
             del st.session_state.emergency_time
             st.success("Emergency resolved automatically.")
-    update_display()  # Ensure metrics update
+    update_display()
     st.write("""
     **Live Monitoring Overview:**  
-    This dashboard provides a real-time 3D representation of the chemical plant, highlighting thermal contours and core temperature. The model updates dynamically based on sensor data, including temperature, pressure, and risk levels. Use the zoom slider to focus on critical areas, and monitor the metrics below for immediate insights into plant performance.  
-    - **Key Metrics:** Temperature (critical above 360°K), Pressure (stable 14-16 bar), Risk Score (action required above 70%).  
-    - **Operational Tip:** Adjust zoom to inspect potential hotspots indicated by red markers.
+    This dashboard provides a real-time 3D thermal profile of the chemical plant, updated every few seconds based on sensor data. The model highlights the core temperature with a red marker, and metrics below reflect dynamic changes in plant conditions.  
+    - **Critical Thresholds:** Temperature (>360°K), Pressure (14-16 bar), Risk Score (>70%).  
+    - **Best Practices:** Use the zoom slider to inspect thermal gradients; monitor metrics for immediate action.
     """)
 
 with tabs[1]:  # AI Insights
@@ -360,11 +370,12 @@ with tabs[1]:  # AI Insights
       - Flow Rate Variation: {prediction['impacts']['flow_rate']:.1f}% (Threshold: 10%)  
       - Pressure Deviation: {prediction['impacts']['pressure']:.1f}% (Threshold: 5%)  
       - Efficiency Impact: {prediction['impacts']['efficiency']:.1f}% (Target: <15%)  
+    - **Predictive Alert:** {prediction['predictive_alert']}  
     **Detailed Recommendations:**  
-    - **Temperature:** Adjust cooling systems if deviation exceeds 5%.  
-    - **Flow Rate:** Stabilize pumps if variation surpasses 10%.  
-    - **Pressure:** Inspect seals if deviation exceeds 5% for 3+ cycles.  
-    - **Efficiency:** Schedule predictive maintenance if impact exceeds 15%.  
+    - Temperature: Activate cooling if >360°K.  
+    - Flow Rate: Adjust pumps if variation >10%.  
+    - Pressure: Inspect seals if >16 bar.  
+    - Efficiency: Schedule maintenance if <80%.  
     """)
     if st.button("Execute Optimization", use_container_width=True, key="optimize_button"):
         with st.spinner("Running optimization algorithm..."):
@@ -414,14 +425,17 @@ with tabs[2]:  # Reports & Trends
     st.plotly_chart(fig, use_container_width=True, key="trend_plot")
     st.write("""
     **Trend Analysis Overview:**  
-    This section tracks smoothed trends across key parameters to identify patterns and anomalies.  
-    - **Temperature (°K):** Indicates thermal stability; spikes suggest overheating risks.  
-    - **Flow Rate (L/s):** Variations may signal pump or valve issues.  
-    - **Risk Score (%):** Rising trends warrant immediate action above 70%.  
-    - **Pressure (bar):** Consistent deviations may indicate leaks or blockages.  
-    - **Efficiency (%):** Declines below 80% suggest maintenance needs.  
-    **Usage Guide:** Export data for advanced statistical analysis or machine learning model training to predict future performance.
+    This section provides smoothed trends for all key parameters, enabling long-term performance evaluation.  
+    - **Temperature (°K):** Stable range 340-355°K; spikes indicate overheating.  
+    - **Flow Rate (L/s):** Optimal 40-44 L/s; drops suggest blockages.  
+    - **Risk Score (%):** Action required >70%; monitor trends for escalation.  
+    - **Pressure (bar):** Target 14-16 bar; deviations signal leaks.  
+    - **Efficiency (%):** Maintain >80%; declines suggest wear.  
+    **Advanced Usage:** Export data for regression analysis or machine learning to forecast maintenance needs.
     """)
+
+    st.subheader("System Logs")
+    st.text_area("Recent Updates", "\n".join(plant.logs[-10:]), height=150, disabled=True)
 
 # Real-time update with session state
 if 'last_update' not in st.session_state:
