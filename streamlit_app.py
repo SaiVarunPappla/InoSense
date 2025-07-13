@@ -25,7 +25,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for professional design
+# Custom CSS for professional and engaging design
 st.markdown("""
 <style>
 html, body, [class*="css"] {
@@ -42,26 +42,26 @@ body.light-mode {
 }
 
 .stMetric {
-    border-radius: 10px;
-    padding: 15px;
+    border-radius: 8px;
+    padding: 12px;
     background-color: #2e3a55;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: transform 0.3s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
 }
 body.light-mode .stMetric {
     background-color: #e0e7f0;
     color: #333333;
 }
 .stMetric:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .emergency-alert {
     background-color: #ff4444;
     color: #ffffff;
-    padding: 15px;
-    border-radius: 8px;
+    padding: 12px;
+    border-radius: 6px;
     text-align: center;
     font-weight: bold;
     animation: pulse 1.5s infinite;
@@ -69,19 +69,19 @@ body.light-mode .stMetric {
 
 @keyframes pulse {
     0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
+    50% { transform: scale(1.02); }
     100% { transform: scale(1); }
 }
 
 .plot-container {
-    border-radius: 10px;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     overflow: hidden;
-    transition: transform 0.3s ease;
+    transition: transform 0.2s ease;
 }
 .plot-container:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
 .stButton>button {
@@ -89,9 +89,9 @@ body.light-mode .stMetric {
     color: #ffffff;
     border: none;
     padding: 10px 20px;
-    border-radius: 5px;
-    font-size: 1.1em;
-    transition: background-color 0.3s ease;
+    border-radius: 4px;
+    font-size: 1em;
+    transition: background-color 0.2s ease;
 }
 .stButton>button:hover {
     background-color: #357abd;
@@ -105,6 +105,7 @@ body.light-mode .stButton>button:hover {
 
 .stTabs [data-baseweb="tab-list"] {
     background-color: #2e3a55;
+    border-radius: 4px;
 }
 body.light-mode .stTabs [data-baseweb="tab-list"] {
     background-color: #d0d9e3;
@@ -132,26 +133,33 @@ with st.sidebar:
 
     ai_mode = st.selectbox("AI Model", ["Isolation Forest v2.0", "Predictive Model v3.0"], index=0)
     zoom_level = st.slider("3D Zoom Level", min_value=1.0, max_value=2.5, value=1.5, step=0.1)
-    refresh_rate = st.slider("Refresh Rate (seconds)", min_value=1, max_value=5, value=2, step=1)  # Fixed syntax error
+    refresh_rate = st.slider("Refresh Rate (seconds)", min_value=1, max_value=5, value=2, step=1)
 
     st.divider()
     st.markdown(f"""
     **Developed by:** Varun  
-    **Version:** 2.5.0  
-    **Last Updated:** {datetime.now().strftime('%Y-%m-%d %H:%M IST')}  # Updated to 2025-07-13 14:42 IST  
+    **Version:** 2.6.0  
+    **Last Updated:** {datetime.now().strftime('%Y-%m-%d %H:%M IST')}  
     **Links:** [GitHub](https://github.com/SaiVarunPappla) | [LinkedIn](https://www.linkedin.com/in/pappla-sai-varun-874902200/)  
-    **Experience:** 2+ Years in AI Development, Cloud Deployment
+    **Experience:** 2+ Years in AI/ML, Certified Cloud Practitioner
     """)
 
 # Main header
 st.header("InoSense | Smart Monitoring of Chemical Processes")
-st.caption("Real-time analytics and optimization for industrial efficiency")
+st.caption("Advanced real-time analytics and optimization for industrial efficiency")
 
-# Plant simulator with progress tracking
+# Plant simulator with dynamic parameters
 class PlantSimulator:
     def __init__(self):
-        self.state = {"temperature": 347.0, "flow_rate": 42.0, "energy_usage": 4.2, "risk_score": 45.0, "pressure": 15.0, "vibration": 0.5}
-        self.history = pd.DataFrame(columns=["time", "temperature", "flow_rate", "energy_usage", "risk_score", "pressure", "vibration"])
+        self.state = {
+            "temperature": 347.0, "flow_rate": 42.0, "energy_usage": 4.2,
+            "risk_score": 45.0, "pressure": 15.0, "vibration": 0.5,
+            "efficiency": 85.0
+        }
+        self.history = pd.DataFrame(columns=[
+            "time", "temperature", "flow_rate", "energy_usage", "risk_score",
+            "pressure", "vibration", "efficiency"
+        ])
         self.progress = 0.0
 
     def update(self):
@@ -162,24 +170,25 @@ class PlantSimulator:
         self.state["risk_score"] = min(100, max(0, 45 + 15 * np.random.normal(0, 1)))
         self.state["pressure"] = 15 + 1 * np.sin(t * 0.12) + np.random.normal(0, 0.3)
         self.state["vibration"] = 0.5 + 0.1 * np.cos(t * 0.18) + np.random.normal(0, 0.05)
+        self.state["efficiency"] = max(50, min(95, 85 + 5 * np.cos(t * 0.1) + np.random.normal(0, 2)))
         self.progress = min(1.0, self.progress + np.random.uniform(0.005, 0.01))
         self.history.loc[len(self.history)] = [datetime.now(), *self.state.values()]
         return self.state
 
 plant = PlantSimulator()
 
-# AI predictor
+# AI predictor with detailed analysis
 class AIPredictor:
     def __init__(self):
-        self.model = IsolationForest(n_estimators=150, contamination=0.1)
+        self.model = IsolationForest(n_estimators=200, contamination=0.1)
         self._fit_initial_model()
 
     def _fit_initial_model(self):
         np.random.seed(42)
-        temp_data = np.random.normal(347, 15, 150)
-        flow_data = np.random.normal(42, 3, 150)
-        energy_data = np.random.normal(4.2, 0.2, 150)
-        pressure_data = np.random.normal(15, 1, 150)
+        temp_data = np.random.normal(347, 15, 200)
+        flow_data = np.random.normal(42, 3, 200)
+        energy_data = np.random.normal(4.2, 0.2, 200)
+        pressure_data = np.random.normal(15, 1, 200)
         training_data = np.column_stack((temp_data, flow_data, energy_data, pressure_data))
         self.model.fit(training_data)
 
@@ -190,18 +199,21 @@ class AIPredictor:
             "risk_score": abs(anomaly_score) * 100,
             "is_anomaly": anomaly_score < -0.6,
             "recommendation": self._get_recommendation(abs(anomaly_score)),
-            "temperature_impact": self._calculate_impact(state["temperature"], 347),
-            "flow_impact": self._calculate_impact(state["flow_rate"], 42),
-            "pressure_impact": self._calculate_impact(state["pressure"], 15)
+            "impacts": {
+                "temperature": self._calculate_impact(state["temperature"], 347),
+                "flow_rate": self._calculate_impact(state["flow_rate"], 42),
+                "pressure": self._calculate_impact(state["pressure"], 15),
+                "efficiency": self._calculate_impact(100 - state["efficiency"], 15)  # Inverse efficiency impact
+            }
         }
 
     def _get_recommendation(self, anomaly_score):
         if anomaly_score > 1.8:
-            return "Critical: Immediate shutdown and expert review required"
+            return "Critical: Immediate shutdown and inspection required"
         elif anomaly_score > 1.2:
-            return "Warning: Adjust settings and monitor closely"
+            return "Warning: Adjust parameters and schedule maintenance"
         else:
-            return "Optimal: Continue with periodic inspections"
+            return "Optimal: Maintain current operations"
 
     def _calculate_impact(self, value, baseline):
         return abs(value - baseline) / baseline * 100
@@ -215,29 +227,34 @@ progress_container = st.empty()
 def update_display():
     plant.update()
     with metrics_container.container():
-        col1, col2, col3, col4, col5, col6 = st.columns(6)
+        col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
         with col1:
-            st.metric("Temperature", f"{plant.state['temperature']:.1f}°K", f"{np.random.uniform(-2, 2):.1f}°C")
+            st.metric("Temperature", f"{plant.state['temperature']:.1f}°K", f"{np.random.uniform(-1, 1):.1f}°C")
         with col2:
-            st.metric("Flow Rate", f"{plant.state['flow_rate']:.1f} L/s", f"{np.random.uniform(-1, 1):.1f}%")
+            st.metric("Flow Rate", f"{plant.state['flow_rate']:.1f} L/s", f"{np.random.uniform(-0.5, 0.5):.1f}%")
         with col3:
-            st.metric("Energy Usage", f"{plant.state['energy_usage']:.1f} MW", f"{np.random.uniform(-0.3, 0.3):.1f} MW")
+            st.metric("Energy Usage", f"{plant.state['energy_usage']:.1f} MW", f"{np.random.uniform(-0.2, 0.2):.1f} MW")
         with col4:
             st.metric("Risk Score", f"{plant.state['risk_score']:.0f}%", delta_color="inverse")
         with col5:
-            st.metric("Pressure", f"{plant.state['pressure']:.1f} bar", f"{np.random.uniform(-0.5, 0.5):.1f} bar")
+            st.metric("Pressure", f"{plant.state['pressure']:.1f} bar", f"{np.random.uniform(-0.3, 0.3):.1f} bar")
         with col6:
-            st.metric("Vibration", f"{plant.state['vibration']:.2f} mm/s", f"{np.random.uniform(-0.05, 0.05):.2f} mm/s")
+            st.metric("Vibration", f"{plant.state['vibration']:.2f} mm/s", f"{np.random.uniform(-0.03, 0.03):.2f} mm/s")
+        with col7:
+            st.metric("Efficiency", f"{plant.state['efficiency']:.1f}%", f"{np.random.uniform(-1, 1):.1f}%")
     with progress_container.container():
         st.progress(plant.progress)
 
-# Enhanced 3D visualization with annotations
+# Enhanced 3D visualization with annotations and contours
 def create_3d_plant(state, zoom):
-    x, y = np.meshgrid(np.linspace(0, 10, 30), np.linspace(0, 10, 30))
-    z = np.sin(x) * np.cos(y) * (state["temperature"] / 500) + np.random.normal(0, 0.1, (30, 30))
-    fig = go.Figure(data=[go.Surface(z=z, colorscale='Viridis', opacity=0.8)])
+    x, y = np.meshgrid(np.linspace(0, 10, 40), np.linspace(0, 10, 40))
+    z = np.sin(x) * np.cos(y) * (state["temperature"] / 500) + np.random.normal(0, 0.1, (40, 40))
+    fig = go.Figure(data=[
+        go.Surface(z=z, colorscale='Viridis', opacity=0.8, showscale=False),
+        go.Contour(z=z, colorscale='Viridis', showscale=False, contours=dict(start=0, end=1, size=0.1))
+    ])
     fig.add_trace(go.Scatter3d(
-        x=[5], y=[5], z=[z[15, 15]], mode='markers+text',
+        x=[5], y=[5], z=[z[20, 20]], mode='markers+text',
         marker=dict(size=10, color='red'),
         text=[f"Temp: {state['temperature']:.1f}°K"],
         textposition="top center",
@@ -246,8 +263,8 @@ def create_3d_plant(state, zoom):
     fig.update_layout(
         scene=dict(xaxis_title='X-Axis', yaxis_title='Y-Axis', zaxis_title='Z-Axis',
                    camera=dict(eye=dict(x=zoom, y=zoom, z=zoom))),
-        margin=dict(l=0, r=0, b=0, t=30),
-        title="3D Plant Model with Annotations"
+        margin=dict(l=0, r=0, b=0, t=40),
+        title="3D Plant Model with Contours"
     )
     return fig
 
@@ -266,13 +283,13 @@ def create_risk_gauge(value):
             'threshold': {'line': {'color': "black", 'width': 2}, 'thickness': 0.75, 'value': value}
         }
     ))
-    fig.update_layout(margin=dict(l=0, r=0, b=0, t=30), height=250)
+    fig.update_layout(margin=dict(l=0, r=0, b=0, t=40), height=250)
     return fig
 
 def create_risk_heatmap(prediction):
     fig = go.Figure(data=go.Heatmap(
-        z=[[prediction["risk_score"], prediction["temperature_impact"]],
-           [prediction["flow_impact"], prediction["pressure_impact"]]],
+        z=[[prediction["risk_score"], prediction["impacts"]["temperature"]],
+           [prediction["impacts"]["flow_rate"], prediction["impacts"]["pressure"]]],
         x=['Risk Score', 'Temp Impact'],
         y=['Flow Impact', 'Pressure Impact'],
         colorscale='RdYlGn',
@@ -280,29 +297,33 @@ def create_risk_heatmap(prediction):
         hovertemplate="%{x}: %{z:.1f}%<extra></extra>"
     ))
     fig.update_layout(
-        title="Risk Distribution Heatmap",
-        margin=dict(l=0, r=0, b=0, t=30),
+        title="Risk Factor Distribution",
+        margin=dict(l=0, r=0, b=0, t=40),
         height=250
     )
     return fig
 
-def create_comparison_chart(history, current_state):
+def create_multi_trend_chart(history):
     fig = go.Figure()
-    fig.add_trace(go.Scatter(y=history["temperature"].tail(10), mode='lines', name='Historical Temp'))
-    fig.add_trace(go.Scatter(y=[current_state["temperature"]] * 10, mode='lines', name='Current Temp', line=dict(dash='dash')))
+    fig.add_trace(go.Scatter(y=history["temperature"].rolling(5).mean(), mode='lines', name='Temperature (°K)', line=dict(color='#1f77b4')))
+    fig.add_trace(go.Scatter(y=history["flow_rate"].rolling(5).mean(), mode='lines', name='Flow Rate (L/s)', line=dict(color='#ff7f0e')))
+    fig.add_trace(go.Scatter(y=history["risk_score"].rolling(5).mean(), mode='lines', name='Risk Score (%)', line=dict(color='#2ca02c')))
+    fig.add_trace(go.Scatter(y=history["pressure"].rolling(5).mean(), mode='lines', name='Pressure (bar)', line=dict(color='#d62728')))
+    fig.add_trace(go.Scatter(y=history["efficiency"].rolling(5).mean(), mode='lines', name='Efficiency (%)', line=dict(color='#9467bd')))
     fig.update_layout(
-        xaxis_title="Last 10 Updates",
-        yaxis_title="Temperature (°K)",
-        title="Historical vs. Current Temperature",
-        template="plotly_dark"
+        xaxis_title="Time",
+        yaxis_title="Value",
+        title="Multi-Parameter Trend Analysis",
+        template="plotly_dark",
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        margin=dict(l=40, r=40, t=40, b=40),
+        height=400
     )
     return fig
 
-# Tab layout
-tab1, tab2, tab3 = st.tabs(["Live Monitoring", "AI Insights", "Reports & Trends"])
-
-with tab1:
-    st.subheader("Live Plant Monitoring")
+# Tab layout with enhanced details
+with st.tabs(["Live Monitoring", "AI Insights", "Reports & Trends"])[0]:  # Live Monitoring
+    st.subheader("Live Plant Monitoring Dashboard")
     st.plotly_chart(create_3d_plant(plant.state, zoom_level), use_container_width=True)
     if st.session_state.get('emergency', False):
         st.markdown('<div class="emergency-alert">Warning: Critical Failure Detected</div>', unsafe_allow_html=True)
@@ -310,9 +331,10 @@ with tab1:
             st.session_state.emergency = False
             del st.session_state.emergency_time
             st.success("Emergency resolved automatically.")
+    st.write("**Real-Time Overview:** Monitor the 3D plant model with dynamic updates reflecting temperature, pressure, and risk levels. Use the zoom slider to explore critical zones.")
 
-with tab2:
-    st.subheader("AI-Powered Insights")
+with st.tabs(["Live Monitoring", "AI Insights", "Reports & Trends"])[1]:  # AI Insights
+    st.subheader("AI-Driven Process Insights")
     prediction = ai_predictor.predict(plant.state)
     col1, col2, col3 = st.columns([2, 2, 3])
     with col1:
@@ -320,39 +342,37 @@ with tab2:
     with col2:
         st.plotly_chart(create_risk_heatmap(prediction), use_container_width=True)
     with col3:
-        st.plotly_chart(create_comparison_chart(plant.history, plant.state), use_container_width=True)
-        st.info(f"""
-        **Action Plan:** {prediction["recommendation"]}  
-        - Anomaly Status: {prediction['is_anomaly']}  
-        - Confidence Level: {min(95, max(50, 100 - prediction['risk_score'])):.0f}%  
-        - Impact Analysis:  
-          - Temperature Deviation: {prediction['temperature_impact']:.1f}%  
-          - Flow Rate Impact: {prediction['flow_impact']:.1f}%  
-          - Pressure Variation: {prediction['pressure_impact']:.1f}%  
-        **Predictive Suggestions:**  
-        - Optimize temperature if deviation exceeds 5%.  
-        - Adjust flow rate for stability if impact > 10%.  
-        - Monitor pressure trends for potential leaks.  
-        """)
-        if st.button("Optimize System", use_container_width=True):
-            with st.spinner("Executing optimization protocol..."):
-                time.sleep(1.5)
-                st.success(f"Optimization complete! Achieved {np.random.uniform(10, 20):.1f}% efficiency gain.")
+        st.plotly_chart(create_multi_trend_chart(plant.history.tail(20)), use_container_width=True)
+    st.info(f"""
+    **Action Plan:** {prediction["recommendation"]}  
+    - Anomaly Status: {prediction['is_anomaly']}  
+    - Confidence Level: {min(95, max(50, 100 - prediction['risk_score'])):.0f}%  
+    - Impact Analysis:  
+      - Temperature Deviation: {prediction['impacts']['temperature']:.1f}%  
+      - Flow Rate Variation: {prediction['impacts']['flow_rate']:.1f}%  
+      - Pressure Deviation: {prediction['impacts']['pressure']:.1f}%  
+      - Efficiency Impact: {prediction['impacts']['efficiency']:.1f}%  
+    **Recommendations:**  
+    - Adjust temperature controls if deviation > 5%.  
+    - Stabilize flow rate if variation exceeds 10%.  
+    - Inspect pressure systems for anomalies.  
+    - Optimize efficiency with predictive maintenance.  
+    """)
+    if st.button("Execute Optimization", use_container_width=True):
+        with st.spinner("Running optimization algorithm..."):
+            time.sleep(1.5)
+            st.success(f"Optimization successful! Efficiency improved by {np.random.uniform(10, 20):.1f}%.")
 
-with tab3:
-    st.subheader("Reports & Trends")
+with st.tabs(["Live Monitoring", "AI Insights", "Reports & Trends"])[2]:  # Reports & Trends
+    st.subheader("Reports & Comprehensive Trends")
     def generate_report():
         pdf = FPDF()
         pdf.add_page()
         pdf.set_font("Arial", size=12)
         pdf.cell(200, 10, txt="InoSense AI Operational Report", ln=1, align='C')
         pdf.cell(200, 10, txt=f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M IST')}", ln=1)
-        pdf.cell(200, 10, txt=f"Temperature: {plant.state['temperature']:.1f}°K", ln=1)
-        pdf.cell(200, 10, txt=f"Flow Rate: {plant.state['flow_rate']:.1f} L/s", ln=1)
-        pdf.cell(200, 10, txt=f"Energy Usage: {plant.state['energy_usage']:.1f} MW", ln=1)
-        pdf.cell(200, 10, txt=f"Risk Score: {plant.state['risk_score']:.1f}%", ln=1)
-        pdf.cell(200, 10, txt=f"Pressure: {plant.state['pressure']:.1f} bar", ln=1)
-        pdf.cell(200, 10, txt=f"Vibration: {plant.state['vibration']:.2f} mm/s", ln=1)
+        for key, value in plant.state.items():
+            pdf.cell(200, 10, txt=f"{key.replace('_', ' ').title()}: {value:.1f} {'' if key == 'risk_score' else key.split('_')[-1]}", ln=1)
         qr = qrcode.QRCode(version=1, box_size=10, border=5)
         qr.add_data(f"InoSense Report - {datetime.now()}")
         qr.make(fit=True)
@@ -379,28 +399,17 @@ with tab3:
         mime="text/csv"
     )
 
-    st.subheader("Historical Trends")
-    window_size = 5
-    smoothed_temp = plant.history["temperature"].rolling(window=window_size, min_periods=1).mean()
-    smoothed_flow = plant.history["flow_rate"].rolling(window=window_size, min_periods=1).mean()
-    smoothed_risk = plant.history["risk_score"].rolling(window=window_size, min_periods=1).mean()
-    smoothed_pressure = plant.history["pressure"].rolling(window=window_size, min_periods=1).mean()
-
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(y=smoothed_temp, mode='lines', name='Temperature (°K)', line=dict(color='#1f77b4', width=2)))
-    fig.add_trace(go.Scatter(y=smoothed_flow, mode='lines', name='Flow Rate (L/s)', line=dict(color='#ff7f0e', width=2)))
-    fig.add_trace(go.Scatter(y=smoothed_risk, mode='lines', name='Risk Score (%)', line=dict(color='#2ca02c', width=2)))
-    fig.add_trace(go.Scatter(y=smoothed_pressure, mode='lines', name='Pressure (bar)', line=dict(color='#d62728', width=2)))
-    fig.update_layout(
-        xaxis_title="Time",
-        yaxis_title="Value",
-        title="Comprehensive Trend Analysis",
-        template="plotly_dark",
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-        margin=dict(l=40, r=40, t=40, b=40),
-        height=400
-    )
+    st.subheader("Comprehensive Trend Analysis")
+    fig = create_multi_trend_chart(plant.history)
     st.plotly_chart(fig, use_container_width=True)
+    st.write("""
+    **Trend Insights:**  
+    - Temperature trends indicate process stability or anomalies over time.  
+    - Flow rate variations may suggest pump performance issues.  
+    - Risk score trends help predict potential failures.  
+    - Pressure and efficiency metrics guide maintenance schedules.  
+    **Analysis Tip:** Use the exported CSV for in-depth statistical modeling.
+    """)
 
 # Real-time update with rerun
 if 'last_update' not in st.session_state:
@@ -409,7 +418,7 @@ if 'last_update' not in st.session_state:
 if time.time() - st.session_state.last_update > refresh_rate:
     update_display()
     st.session_state.last_update = time.time()
-    st.experimental_rerun()
+    st.rerun()  # Updated from experimental_rerun
 
 # Reset emergency on page load if timed out
 if 'emergency' in st.session_state and 'emergency_time' in st.session_state:
