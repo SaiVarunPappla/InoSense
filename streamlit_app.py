@@ -131,15 +131,13 @@ with st.sidebar:
         st.toast("Emergency triggered!", icon="⚠️")
 
     ai_mode = st.selectbox("AI Model", ["Isolation Forest v2.0", "Predictive Model v3.0"], index=0)
-    zoom_level = st.slider("3D Zoom Level", min_value=1.0, max_value=2.0, value=1.5, step=0.1)
-    refresh_rate = st.slider("Refresh Rate (seconds)", min_value=1, max_value=5, value=2, step=1)
-    if st.button("Update Data", use_container_width=True):
-        update_display()
+    zoom_level = st.slider("3D Zoom Level", min_value=1.0, max_value=2.5, value=1.5, step=0.1)
+    refresh_rate = st.slider("Refresh Rate (seconds)", min_value=1, max_value 5, value=2, step=1)
 
     st.divider()
     st.markdown(f"""
     **Developed by:** Varun  
-    **Version:** 2.4.0  
+    **Version:** 2.5.0  
     **Last Updated:** {datetime.now().strftime('%Y-%m-%d %H:%M IST')}  
     **Links:** [GitHub](https://github.com/SaiVarunPappla) | [LinkedIn](https://www.linkedin.com/in/pappla-sai-varun-874902200/)  
     **Experience:** 2+ Years in AI Development, Cloud Deployment
@@ -152,9 +150,9 @@ st.caption("Real-time analytics and optimization for industrial efficiency")
 # Plant simulator with progress tracking
 class PlantSimulator:
     def __init__(self):
-        self.state = {"temperature": 347.0, "flow_rate": 42.0, "energy_usage": 4.2, "risk_score": 45.0}
-        self.history = pd.DataFrame(columns=["time", "temperature", "flow_rate", "energy_usage", "risk_score"])
-        self.progress = 0.0  # Initialize as 0.0-1.0
+        self.state = {"temperature": 347.0, "flow_rate": 42.0, "energy_usage": 4.2, "risk_score": 45.0, "pressure": 15.0, "vibration": 0.5}
+        self.history = pd.DataFrame(columns=["time", "temperature", "flow_rate", "energy_usage", "risk_score", "pressure", "vibration"])
+        self.progress = 0.0
 
     def update(self):
         t = time.time()
@@ -162,7 +160,9 @@ class PlantSimulator:
         self.state["flow_rate"] = 42 + 2 * np.cos(t * 0.15) + np.random.normal(0, 0.7)
         self.state["energy_usage"] = 4.2 - 0.1 * np.sin(t * 0.2) + np.random.normal(0, 0.05)
         self.state["risk_score"] = min(100, max(0, 45 + 15 * np.random.normal(0, 1)))
-        self.progress = min(1.0, self.progress + np.random.uniform(0.005, 0.01))  # Gradual progress 0.0-1.0
+        self.state["pressure"] = 15 + 1 * np.sin(t * 0.12) + np.random.normal(0, 0.3)
+        self.state["vibration"] = 0.5 + 0.1 * np.cos(t * 0.18) + np.random.normal(0, 0.05)
+        self.progress = min(1.0, self.progress + np.random.uniform(0.005, 0.01))
         self.history.loc[len(self.history)] = [datetime.now(), *self.state.values()]
         return self.state
 
@@ -179,68 +179,75 @@ class AIPredictor:
         temp_data = np.random.normal(347, 15, 150)
         flow_data = np.random.normal(42, 3, 150)
         energy_data = np.random.normal(4.2, 0.2, 150)
-        training_data = np.column_stack((temp_data, flow_data, energy_data))
+        pressure_data = np.random.normal(15, 1, 150)
+        training_data = np.column_stack((temp_data, flow_data, energy_data, pressure_data))
         self.model.fit(training_data)
 
     def predict(self, state):
-        features = np.array([state["temperature"], state["flow_rate"], state["energy_usage"]]).reshape(1, -1)
+        features = np.array([state["temperature"], state["flow_rate"], state["energy_usage"], state["pressure"]]).reshape(1, -1)
         anomaly_score = self.model.score_samples(features)[0]
         return {
             "risk_score": abs(anomaly_score) * 100,
             "is_anomaly": anomaly_score < -0.6,
             "recommendation": self._get_recommendation(abs(anomaly_score)),
-            "temperature_impact": self._calculate_impact(state["temperature"]),
-            "flow_impact": self._calculate_impact(state["flow_rate"])
+            "temperature_impact": self._calculate_impact(state["temperature"], 347),
+            "flow_impact": self._calculate_impact(state["flow_rate"], 42),
+            "pressure_impact": self._calculate_impact(state["pressure"], 15)
         }
 
     def _get_recommendation(self, anomaly_score):
         if anomaly_score > 1.8:
-            return "Critical: Immediate shutdown and inspection recommended"
+            return "Critical: Immediate shutdown and expert review required"
         elif anomaly_score > 1.2:
-            return "Warning: Adjust parameters and schedule review"
+            return "Warning: Adjust settings and monitor closely"
         else:
-            return "Normal: Maintain current operations with routine checks"
+            return "Optimal: Continue with periodic inspections"
 
-    def _calculate_impact(self, value):
-        baseline = {"temperature": 347, "flow_rate": 42}
-        return abs(value - baseline.get(value)) / baseline.get(value) * 100 if value in baseline else 0
+    def _calculate_impact(self, value, baseline):
+        return abs(value - baseline) / baseline * 100
 
 ai_predictor = AIPredictor()
 
-# Real-time metrics with session state
+# Real-time metrics with dynamic updates
 metrics_container = st.empty()
 progress_container = st.empty()
 
 def update_display():
     plant.update()
     with metrics_container.container():
-        col1, col2, col3, col4 = st.columns(4)
+        col1, col2, col3, col4, col5, col6 = st.columns(6)
         with col1:
-            st.metric("Reactor Temperature", f"{plant.state['temperature']:.1f}°K", f"{np.random.uniform(-2, 2):.1f}°C")
+            st.metric("Temperature", f"{plant.state['temperature']:.1f}°K", f"{np.random.uniform(-2, 2):.1f}°C")
         with col2:
             st.metric("Flow Rate", f"{plant.state['flow_rate']:.1f} L/s", f"{np.random.uniform(-1, 1):.1f}%")
         with col3:
             st.metric("Energy Usage", f"{plant.state['energy_usage']:.1f} MW", f"{np.random.uniform(-0.3, 0.3):.1f} MW")
         with col4:
-            st.metric("Risk Level", f"{plant.state['risk_score']:.0f}%", delta_color="inverse")
+            st.metric("Risk Score", f"{plant.state['risk_score']:.0f}%", delta_color="inverse")
+        with col5:
+            st.metric("Pressure", f"{plant.state['pressure']:.1f} bar", f"{np.random.uniform(-0.5, 0.5):.1f} bar")
+        with col6:
+            st.metric("Vibration", f"{plant.state['vibration']:.2f} mm/s", f"{np.random.uniform(-0.05, 0.05):.2f} mm/s")
     with progress_container.container():
         st.progress(plant.progress)
 
-# Enhanced 3D visualization
+# Enhanced 3D visualization with annotations
 def create_3d_plant(state, zoom):
     x, y = np.meshgrid(np.linspace(0, 10, 30), np.linspace(0, 10, 30))
     z = np.sin(x) * np.cos(y) * (state["temperature"] / 500) + np.random.normal(0, 0.1, (30, 30))
     fig = go.Figure(data=[go.Surface(z=z, colorscale='Viridis', opacity=0.8)])
     fig.add_trace(go.Scatter3d(
-        x=[5], y=[5], z=[z[15, 15]], mode='markers',
+        x=[5], y=[5], z=[z[15, 15]], mode='markers+text',
         marker=dict(size=10, color='red'),
+        text=[f"Temp: {state['temperature']:.1f}°K"],
+        textposition="top center",
         hovertemplate="Core Temp: %{z:.1f}°K<extra></extra>"
     ))
     fig.update_layout(
         scene=dict(xaxis_title='X-Axis', yaxis_title='Y-Axis', zaxis_title='Z-Axis',
                    camera=dict(eye=dict(x=zoom, y=zoom, z=zoom))),
         margin=dict(l=0, r=0, b=0, t=30),
-        title="3D Plant Model"
+        title="3D Plant Model with Annotations"
     )
     return fig
 
@@ -265,9 +272,9 @@ def create_risk_gauge(value):
 def create_risk_heatmap(prediction):
     fig = go.Figure(data=go.Heatmap(
         z=[[prediction["risk_score"], prediction["temperature_impact"]],
-           [prediction["flow_impact"], 100 - prediction["risk_score"]]],
+           [prediction["flow_impact"], prediction["pressure_impact"]]],
         x=['Risk Score', 'Temp Impact'],
-        y=['Flow Impact', 'Stability'],
+        y=['Flow Impact', 'Pressure Impact'],
         colorscale='RdYlGn',
         zmin=0, zmax=100,
         hovertemplate="%{x}: %{z:.1f}%<extra></extra>"
@@ -276,6 +283,18 @@ def create_risk_heatmap(prediction):
         title="Risk Distribution Heatmap",
         margin=dict(l=0, r=0, b=0, t=30),
         height=250
+    )
+    return fig
+
+def create_comparison_chart(history, current_state):
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(y=history["temperature"].tail(10), mode='lines', name='Historical Temp'))
+    fig.add_trace(go.Scatter(y=[current_state["temperature"]] * 10, mode='lines', name='Current Temp', line=dict(dash='dash')))
+    fig.update_layout(
+        xaxis_title="Last 10 Updates",
+        yaxis_title="Temperature (°K)",
+        title="Historical vs. Current Temperature",
+        template="plotly_dark"
     )
     return fig
 
@@ -295,23 +314,30 @@ with tab1:
 with tab2:
     st.subheader("AI-Powered Insights")
     prediction = ai_predictor.predict(plant.state)
-    col1, col2 = st.columns([3, 2])
+    col1, col2, col3 = st.columns([2, 2, 3])
     with col1:
         st.plotly_chart(create_risk_gauge(prediction["risk_score"]), use_container_width=True)
     with col2:
         st.plotly_chart(create_risk_heatmap(prediction), use_container_width=True)
+    with col3:
+        st.plotly_chart(create_comparison_chart(plant.history, plant.state), use_container_width=True)
         st.info(f"""
         **Action Plan:** {prediction["recommendation"]}  
         - Anomaly Status: {prediction['is_anomaly']}  
         - Confidence Level: {min(95, max(50, 100 - prediction['risk_score'])):.0f}%  
-        - Temperature Deviation: {prediction['temperature_impact']:.1f}%  
-        - Flow Rate Impact: {prediction['flow_impact']:.1f}%  
-        **Next Steps:** Review logs for detailed analysis and implement adjustments.
+        - Impact Analysis:  
+          - Temperature Deviation: {prediction['temperature_impact']:.1f}%  
+          - Flow Rate Impact: {prediction['flow_impact']:.1f}%  
+          - Pressure Variation: {prediction['pressure_impact']:.1f}%  
+        **Predictive Suggestions:**  
+        - Optimize temperature if deviation exceeds 5%.  
+        - Adjust flow rate for stability if impact > 10%.  
+        - Monitor pressure trends for potential leaks.  
         """)
-        if st.button("Optimize Parameters", use_container_width=True):
-            with st.spinner("Optimizing system parameters..."):
+        if st.button("Optimize System", use_container_width=True):
+            with st.spinner("Executing optimization protocol..."):
                 time.sleep(1.5)
-                st.success(f"Optimization complete! Energy savings: {np.random.uniform(10, 20):.1f}%")
+                st.success(f"Optimization complete! Achieved {np.random.uniform(10, 20):.1f}% efficiency gain.")
 
 with tab3:
     st.subheader("Reports & Trends")
@@ -321,7 +347,12 @@ with tab3:
         pdf.set_font("Arial", size=12)
         pdf.cell(200, 10, txt="InoSense AI Operational Report", ln=1, align='C')
         pdf.cell(200, 10, txt=f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M IST')}", ln=1)
+        pdf.cell(200, 10, txt=f"Temperature: {plant.state['temperature']:.1f}°K", ln=1)
+        pdf.cell(200, 10, txt=f"Flow Rate: {plant.state['flow_rate']:.1f} L/s", ln=1)
+        pdf.cell(200, 10, txt=f"Energy Usage: {plant.state['energy_usage']:.1f} MW", ln=1)
         pdf.cell(200, 10, txt=f"Risk Score: {plant.state['risk_score']:.1f}%", ln=1)
+        pdf.cell(200, 10, txt=f"Pressure: {plant.state['pressure']:.1f} bar", ln=1)
+        pdf.cell(200, 10, txt=f"Vibration: {plant.state['vibration']:.2f} mm/s", ln=1)
         qr = qrcode.QRCode(version=1, box_size=10, border=5)
         qr.add_data(f"InoSense Report - {datetime.now()}")
         qr.make(fit=True)
@@ -331,32 +362,54 @@ with tab3:
         return pdf.output(dest='S').encode('latin1')
 
     st.download_button(
-        label="Download Report (PDF)",
+        label="Download Detailed Report (PDF)",
         data=generate_report(),
         file_name=f"inosense_report_{datetime.now().strftime('%Y%m%d_%H%M')}.pdf",
         mime="application/pdf"
     )
 
+    def export_data():
+        csv = plant.history.to_csv(index=False)
+        return csv.encode()
+
+    st.download_button(
+        label="Export Historical Data (CSV)",
+        data=export_data(),
+        file_name=f"inosense_data_{datetime.now().strftime('%Y%m%d_%H%M')}.csv",
+        mime="text/csv"
+    )
+
     st.subheader("Historical Trends")
-    # Smooth data with moving average
     window_size = 5
     smoothed_temp = plant.history["temperature"].rolling(window=window_size, min_periods=1).mean()
-    smoothed_risk = plant.history["risk_score"].rolling(window=window_size, min_periods=1).mean()
     smoothed_flow = plant.history["flow_rate"].rolling(window=window_size, min_periods=1).mean()
+    smoothed_risk = plant.history["risk_score"].rolling(window=window_size, min_periods=1).mean()
+    smoothed_pressure = plant.history["pressure"].rolling(window=window_size, min_periods=1).mean()
 
     fig = go.Figure()
-    fig.add_trace(go.Scatter(y=smoothed_temp, mode='lines', name='Temperature (°K)', line=dict(color='#1f77b4')))
-    fig.add_trace(go.Scatter(y=smoothed_risk, mode='lines', name='Risk Score (%)', line=dict(color='#ff7f0e')))
-    fig.add_trace(go.Scatter(y=smoothed_flow, mode='lines', name='Flow Rate (L/s)', line=dict(color='#2ca02c')))
+    fig.add_trace(go.Scatter(y=smoothed_temp, mode='lines', name='Temperature (°K)', line=dict(color='#1f77b4', width=2)))
+    fig.add_trace(go.Scatter(y=smoothed_flow, mode='lines', name='Flow Rate (L/s)', line=dict(color='#ff7f0e', width=2)))
+    fig.add_trace(go.Scatter(y=smoothed_risk, mode='lines', name='Risk Score (%)', line=dict(color='#2ca02c', width=2)))
+    fig.add_trace(go.Scatter(y=smoothed_pressure, mode='lines', name='Pressure (bar)', line=dict(color='#d62728', width=2)))
     fig.update_layout(
         xaxis_title="Time",
         yaxis_title="Value",
-        title="Smoothed Trend Analysis",
+        title="Comprehensive Trend Analysis",
         template="plotly_dark",
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-        margin=dict(l=40, r=40, t=40, b=40)
+        margin=dict(l=40, r=40, t=40, b=40),
+        height=400
     )
     st.plotly_chart(fig, use_container_width=True)
+
+# Real-time update with rerun
+if 'last_update' not in st.session_state:
+    st.session_state.last_update = time.time()
+
+if time.time() - st.session_state.last_update > refresh_rate:
+    update_display()
+    st.session_state.last_update = time.time()
+    st.experimental_rerun()
 
 # Reset emergency on page load if timed out
 if 'emergency' in st.session_state and 'emergency_time' in st.session_state:
@@ -366,8 +419,8 @@ if 'emergency' in st.session_state and 'emergency_time' in st.session_state:
 
 # Footer
 st.divider()
-st.markdown("<h4 style='text-align: center; color: #ffffff;'>© 2025 InoSense AI | Advanced Industrial Solutions</h4>", unsafe_allow_html=True)
+st.markdown("<h4 style='text-align: center; color: #ffffff;'>© 2025 InoSense AI | Pioneering Industrial Intelligence</h4>", unsafe_allow_html=True)
 st.caption("""
 Developed by Varun | Technologies: Python, Streamlit, Plotly, scikit-learn  
-[GitHub](https://github.com/SaiVarunPappla) | [LinkedIn](https://www.linkedin.com/in/pappla-sai-varun-874902200/)
+[GitHub](https://github.com/SaiVarunPappla) | [LinkedIn](https://www.linkedin.com/in/pappla-sai-varun-874902200/)  
 """)
