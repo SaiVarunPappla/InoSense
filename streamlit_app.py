@@ -11,6 +11,7 @@ from io import BytesIO
 from fpdf import FPDF
 import qrcode
 from sklearn.ensemble import IsolationForest
+import streamlit.components.v1 as components
 
 # Configure Streamlit environment
 os.environ['STREAMLIT_SERVER_ROOT'] = tempfile.gettempdir()
@@ -19,121 +20,125 @@ os.environ['STREAMLIT_GLOBAL_DEVELOPMENT_MODE'] = 'false'
 
 # Page configuration
 st.set_page_config(
-    page_title="InoSense AI | Next-Gen Chemical Plant Monitor",
-    page_icon="🏭",
+    page_title="InoSense AI | Quantum Plant Analytics",
+    page_icon="🌐",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for engaging animations and futuristic design
+# Custom CSS for holographic and interactive design
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap');
 
 html, body, [class*="css"] {
     font-family: 'Orbitron', 'Roboto', sans-serif;
-    background: linear-gradient(135deg, #0f0f1a, #1a2a44);
-    color: #e0f7fa;
+    background: linear-gradient(135deg, #0a0f1a, #1a2a44, #0a1a2a);
+    color: #00ffcc;
     overflow-x: hidden;
 }
 
 .stMetric {
-    border-radius: 15px;
-    padding: 20px;
-    background: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 5px 15px rgba(0, 191, 255, 0.2);
-    transition: all 0.5s ease;
+    border-radius: 20px;
+    padding: 25px;
+    background: rgba(0, 255, 204, 0.1);
+    box-shadow: 0 8px 20px rgba(0, 255, 204, 0.3);
+    transition: all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 .stMetric:hover {
-    transform: translateY(-10px) scale(1.05);
-    box-shadow: 0 10px 25px rgba(0, 191, 255, 0.4);
+    transform: translateY(-12px) scale(1.1);
+    box-shadow: 0 15px 35px rgba(0, 255, 204, 0.5);
 }
 
-@keyframes pulseGlow {
-    0% { box-shadow: 0 0 5px #00ffcc, 0 0 10px #00ffcc; }
-    50% { box-shadow: 0 0 15px #00ffcc, 0 0 20px #00ffcc; }
-    100% { box-shadow: 0 0 5px #00ffcc, 0 0 10px #00ffcc; }
+@keyframes holographicPulse {
+    0% { box-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc; }
+    50% { box-shadow: 0 0 25px #00ffcc, 0 0 40px #00ffcc; }
+    100% { box-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc; }
 }
 .emergency-alert {
-    animation: pulseGlow 2s infinite;
-    background: linear-gradient(45deg, #ff3333, #ff6666);
+    animation: holographicPulse 2.5s infinite;
+    background: linear-gradient(45deg, #ff1a1a, #ff4d4d);
     color: #fff;
-    padding: 15px;
-    border-radius: 10px;
+    padding: 20px;
+    border-radius: 15px;
     text-align: center;
     font-weight: 700;
+    text-shadow: 0 0 5px #fff, 0 0 10px #fff;
 }
 
 .plot-container {
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 191, 255, 0.3);
+    border-radius: 25px;
+    box-shadow: 0 12px 40px rgba(0, 255, 204, 0.4);
     overflow: hidden;
-    transition: all 0.6s ease;
+    transition: all 0.7s ease-in-out;
 }
 .plot-container:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 40px rgba(0, 191, 255, 0.5);
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 50px rgba(0, 255, 204, 0.6);
 }
 
 .stButton>button {
-    background: linear-gradient(45deg, #00c4cc, #00eaff);
+    background: linear-gradient(45deg, #00ccff, #00ffcc);
     color: #fff;
     border: none;
-    padding: 12px 25px;
-    border-radius: 10px;
-    font-size: 1.1em;
-    transition: all 0.5s ease;
+    padding: 15px 30px;
+    border-radius: 12px;
+    font-size: 1.2em;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.6s ease;
 }
 .stButton>button:hover {
-    transform: translateY(-3px) scale(1.1);
-    box-shadow: 0 8px 20px rgba(0, 234, 255, 0.6);
-    background: linear-gradient(45deg, #00eaff, #00c4cc);
+    transform: translateY(-5px) scale(1.15);
+    box-shadow: 0 10px 30px rgba(0, 255, 204, 0.7);
+    background: linear-gradient(45deg, #00ffcc, #00ccff);
 }
 
-@keyframes slideIn {
-    from { transform: translateX(-100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
-.stTabs [data-baseweb="tab-list"] {
-    animation: slideIn 0.7s ease-out;
+.stTabs [data-baseweb="tab-list"], .stHeader {
+    animation: fadeInUp 1s ease-out;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# Sidebar controls
+# Sidebar with interactive controls
 with st.sidebar:
-    st.title("🖥️ Control Hub")
-    dark_mode = st.toggle("🌌 Dark Mode", True)
+    st.title("🌌 Command Center")
+    dark_mode = st.toggle("☀️ Light Mode", False)  # Reversed for futuristic feel
     if dark_mode:
-        st.markdown("<style>body {background-color: #0f0f1a;}</style>", unsafe_allow_html=True)
-    else:
         st.markdown("<style>body {background-color: #e0f7fa; color: #1a2a44;}</style>", unsafe_allow_html=True)
+    else:
+        st.markdown("<style>body {background-color: #0a0f1a;}</style>", unsafe_allow_html=True)
 
-    emergency = st.button("🚨 Emergency Mode", help="Simulate critical failure", use_container_width=True)
+    emergency = st.button("🚨 Critical Alert", help="Trigger emergency simulation", use_container_width=True)
     if emergency:
         st.session_state.emergency = True
-        st.toast("🔴 Emergency mode activated!", icon="🚨")
+        st.toast("🔴 Alert: System critical!", icon="🚨")
 
-    model_version = st.selectbox("🤖 AI Model", ["Isolation Forest v2.0", "LSTM v5.0", "Neural Net v3.0"], index=0)
-    if st.button("🎙️ Voice Command", use_container_width=True):
-        with st.spinner("Analyzing voice input..."):
+    ai_mode = st.selectbox("🧠 AI Mode", ["Isolation Forest v2.0", "DeepNet v3.5", "Hybrid v1.0"], index=0)
+    zoom_level = st.slider("🔍 3D Zoom", min_value=1.0, max_value=2.0, value=1.5, step=0.1)
+    if st.button("🎙️ Voice Activation", use_container_width=True):
+        with st.spinner("Processing voice command..."):
             time.sleep(1.2)
-            st.success("Command received: 'Display 3D model'")
+            st.success("Command: 'Show full analytics'")
 
     st.divider()
     st.markdown(f"""
-    **Developer:** Varun  
-    **Version:** 1.2.0  
-    **Last Updated:** {datetime.now().strftime('%Y-%m-%d %H:%M IST')}  
-    **GitHub:** [InoSense](https://github.com/yourusername/inosense)  
-    **LinkedIn:** [Profile](https://linkedin.com/in/yourprofile)
+    **Creator:** Varun  
+    **Version:** 2.0.0  
+    **Updated:** {datetime.now().strftime('%Y-%m-%d %H:%M IST')}  
+    **Portfolio:** [GitHub](https://github.com/yourusername/inosense) | [LinkedIn](https://linkedin.com/in/yourprofile)  
+    **Certifications:** AI/ML Nanodegree, AWS Cloud Practitioner
     """)
 
-# Main title and intro with animation
-st.markdown("<h1 style='animation: slideIn 1s ease-out; text-align: center;'>🏭 InoSense AI: Next-Gen Plant Monitoring</h1>", unsafe_allow_html=True)
-st.caption("Cutting-edge AI for real-time optimization and 3D visualization")
+# Main header with animation
+st.markdown("<h1 style='text-align: center; animation: fadeInUp 1.5s ease-out; color: #00ffcc; text-shadow: 0 0 10px #00ffcc;'>🌐 InoSense AI: Quantum Plant Analytics</h1>", unsafe_allow_html=True)
+st.caption("Revolutionizing industrial monitoring with AI and immersive 3D tech")
 
-# Simulated plant data with enhanced realism
+# Advanced plant simulator with streaming
 class PlantSimulator:
     def __init__(self):
         self.state = {"temperature": 347.0, "flow_rate": 42.0, "energy_usage": 4.2, "risk_score": 45.0}
@@ -141,77 +146,88 @@ class PlantSimulator:
 
     def update(self):
         t = time.time()
-        self.state["temperature"] = 347 + 5 * np.sin(t * 0.1) + np.random.normal(0, 1.5)
-        self.state["flow_rate"] = 42 + 2 * np.cos(t * 0.15) + np.random.normal(0, 0.7)
-        self.state["energy_usage"] = 4.2 - 0.1 * np.sin(t * 0.2) + np.random.normal(0, 0.07)
-        self.state["risk_score"] = min(100, max(0, 45 + 15 * np.random.normal(0, 1)))
+        self.state["temperature"] = 347 + 6 * np.sin(t * 0.1) + np.random.normal(0, 2.0)
+        self.state["flow_rate"] = 42 + 3 * np.cos(t * 0.15) + np.random.normal(0, 1.0)
+        self.state["energy_usage"] = 4.2 - 0.15 * np.sin(t * 0.2) + np.random.normal(0, 0.1)
+        self.state["risk_score"] = min(100, max(0, 45 + 20 * np.random.normal(0, 1)))
         self.history.loc[len(self.history)] = [datetime.now(), *self.state.values()]
         return self.state
 
 plant = PlantSimulator()
 
-# AI Prediction Engine
+# Advanced AI predictor with simulated deep learning
 class AIPredictor:
     def __init__(self):
-        self.model = IsolationForest(n_estimators=150, contamination=0.1)
+        self.model = IsolationForest(n_estimators=200, contamination=0.1)
         self._fit_initial_model()
 
     def _fit_initial_model(self):
         np.random.seed(42)
-        temp_data = np.random.normal(347, 15, 150)
-        flow_data = np.random.normal(42, 3, 150)
-        energy_data = np.random.normal(4.2, 0.2, 150)
+        temp_data = np.random.normal(347, 20, 200)
+        flow_data = np.random.normal(42, 4, 200)
+        energy_data = np.random.normal(4.2, 0.3, 200)
         training_data = np.column_stack((temp_data, flow_data, energy_data))
         self.model.fit(training_data)
 
     def predict(self, state):
         features = np.array([state["temperature"], state["flow_rate"], state["energy_usage"]]).reshape(1, -1)
         anomaly_score = self.model.score_samples(features)[0]
+        deep_score = self._simulate_deep_learning(features)  # Simulated deep learning output
         return {
-            "risk_score": abs(anomaly_score) * 100,
-            "is_anomaly": anomaly_score < -0.6,
-            "recommendation": self._get_recommendation(abs(anomaly_score))
+            "risk_score": (abs(anomaly_score) * 60 + deep_score * 40),
+            "is_anomaly": anomaly_score < -0.7 or deep_score > 1.5,
+            "recommendation": self._get_recommendation(abs(anomaly_score), deep_score)
         }
 
-    def _get_recommendation(self, anomaly_score):
-        if anomaly_score > 1.8:
-            return "CRITICAL: Immediate shutdown and team alert"
-        elif anomaly_score > 1.2:
-            return "WARNING: Adjust settings and inspect"
+    def _simulate_deep_learning(self, features):
+        # Dummy deep learning simulation
+        return np.tanh(features[0][0] / 100 + features[0][1] / 20 - features[0][2]) * 2
+
+    def _get_recommendation(self, anomaly_score, deep_score):
+        total_risk = anomaly_score + deep_score
+        if total_risk > 3.0:
+            return "CRITICAL: Emergency shutdown and AI diagnostics"
+        elif total_risk > 2.0:
+            return "WARNING: Adjust parameters and escalate"
         else:
-            return "STABLE: Maintain routine checks"
+            return "OPTIMAL: Proceed with AI monitoring"
 
 ai_predictor = AIPredictor()
 
-# Real-time metrics with animations
+# Real-time metrics with streaming
 metrics_container = st.empty()
-with metrics_container.container():
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.metric("🌡️ Reactor Temp", f"{plant.state['temperature']:.1f}°K", f"{np.random.uniform(-2, 2):.1f}°C",
-                  help="AI-monitored temperature")
-    with col2:
-        st.metric("🔄 Flow Rate", f"{plant.state['flow_rate']:.1f} L/s", f"{np.random.uniform(-1, 1):.1f}%")
-    with col3:
-        st.metric("⚡ Energy Use", f"{plant.state['energy_usage']:.1f} MW", f"{np.random.uniform(-0.3, 0.3):.1f} MW")
-    with col4:
-        st.metric("⚠️ Risk Level", f"{'High' if plant.state['risk_score'] > 70 else 'Medium' if plant.state['risk_score'] > 30 else 'Low'}",
-                  f"{plant.state['risk_score']:.0f}%", delta_color="inverse")
+def update_metrics():
+    with metrics_container.container():
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.metric("🌡️ Core Temp", f"{plant.state['temperature']:.1f}°K", f"{np.random.uniform(-2, 2):.1f}°C")
+        with col2:
+            st.metric("🔄 Flow Rate", f"{plant.state['flow_rate']:.1f} L/s", f"{np.random.uniform(-1, 1):.1f}%")
+        with col3:
+            st.metric("⚡ Power Use", f"{plant.state['energy_usage']:.1f} MW", f"{np.random.uniform(-0.3, 0.3):.1f} MW")
+        with col4:
+            st.metric("⚠️ Risk Index", f"{'High' if plant.state['risk_score'] > 70 else 'Medium' if plant.state['risk_score'] > 30 else 'Low'}",
+                      f"{plant.state['risk_score']:.0f}%", delta_color="inverse")
 
-# Enhanced 3D Visualizations
-def create_3d_plant(state):
-    x, y = np.meshgrid(np.linspace(0, 10, 20), np.linspace(0, 10, 20))
-    z = np.sin(x) * np.cos(y) * (state["temperature"] / 500) + np.random.normal(0, 0.1, (20, 20))
-    fig = go.Figure(data=[go.Surface(z=z, colorscale='Viridis', opacity=0.9)])
+# Advanced 3D visualization with heatmap
+def create_3d_plant(state, zoom):
+    x, y = np.meshgrid(np.linspace(0, 10, 30), np.linspace(0, 10, 30))
+    z = np.sin(x) * np.cos(y) * (state["temperature"] / 500) + np.random.normal(0, 0.15, (30, 30))
+    fig = go.Figure(data=[go.Surface(z=z, colorscale='RdYlBu', opacity=0.85, showscale=False)])
+    fig.add_trace(go.Heatmap(
+        z=z, colorscale='RdYlBu', opacity=0.6, showscale=True,
+        hovertemplate="X: %{x}<br>Y: %{y}<br>Z: %{z:.2f}<extra></extra>"
+    ))
     fig.add_trace(go.Scatter3d(
-        x=[5], y=[5], z=[z[10, 10]], mode='markers',
-        marker=dict(size=10, color='red', symbol='diamond', line=dict(width=2, color='DarkSlateGrey')),
-        hovertext=f"Core Temp: {state['temperature']:.1f}°K"
+        x=[5], y=[5], z=[z[15, 15]], mode='markers+text',
+        marker=dict(size=12, color='red', symbol='diamond', line=dict(width=2)),
+        text=[f"Core: {state['temperature']:.1f}°K"], textposition="top center"
     ))
     fig.update_layout(
-        scene=dict(xaxis_title='X', yaxis_title='Y', zaxis_title='Z', camera=dict(eye=dict(x=1.5, y=1.5, z=1.0))),
-        margin=dict(l=0, r=0, b=0, t=30),
-        title="Dynamic 3D Plant Model"
+        scene=dict(xaxis_title='X-Axis', yaxis_title='Y-Axis', zaxis_title='Z-Axis',
+                   camera=dict(eye=dict(x=zoom, y=zoom, z=zoom))),
+        margin=dict(l=0, r=0, b=0, t=40),
+        title="Interactive 3D Plant Heatmap"
     )
     return fig
 
@@ -220,30 +236,30 @@ def create_risk_gauge(value):
         mode="gauge+number+delta",
         value=value,
         domain={'x': [0, 1], 'y': [0, 1]},
-        title={'text': "AI Risk Matrix"},
+        title={'text': "Quantum Risk Assessment"},
         gauge={
-            'axis': {'range': [0, 100]},
+            'axis': {'range': [0, 100], 'tickcolor': "#00ffcc"},
             'steps': [
-                {'range': [0, 30], 'color': "green"},
-                {'range': [30, 70], 'color': "yellow"},
-                {'range': [70, 100], 'color': "red"}],
-            'threshold': {'line': {'color': "white", 'width': 4}, 'thickness': 0.75, 'value': value}
+                {'range': [0, 30], 'color': "rgba(0, 255, 0, 0.7)"},
+                {'range': [30, 70], 'color': "rgba(255, 255, 0, 0.7)"},
+                {'range': [70, 100], 'color': "rgba(255, 0, 0, 0.7)"}],
+            'threshold': {'line': {'color': "#00ffcc", 'width': 5}, 'thickness': 1.0, 'value': value}
         }
     ))
-    fig.update_layout(margin=dict(l=0, r=0, b=0, t=30), height=250)
+    fig.update_layout(margin=dict(l=0, r=0, b=0, t=40), height=300)
     return fig
 
-# Tab layout with transitions
-tab1, tab2, tab3 = st.tabs(["📊 Live Feed", "🤖 AI Insights", "📁 Analytics"])
+# Tab layout with custom components
+tab1, tab2, tab3 = st.tabs(["🌍 Live 3D Hub", "🧠 AI Quantum Lab", "📊 Data Vault"])
 
 with tab1:
-    st.subheader("Real-Time Plant Visualization")
-    st.plotly_chart(create_3d_plant(plant.state), use_container_width=True, config={'displayModeBar': False})
+    st.subheader("Immersive 3D Plant Monitoring")
+    st.plotly_chart(create_3d_plant(plant.state, zoom_level), use_container_width=True, config={'displayModeBar': True})
     if st.session_state.get('emergency'):
-        st.markdown('<div class="emergency-alert">🚨 CRITICAL ALERT: SYSTEM OVERLOAD DETECTED</div>', unsafe_allow_html=True)
+        st.markdown('<div class="emergency-alert">🚨 QUANTUM ALERT: SYSTEM FAILURE IMMINENT</div>', unsafe_allow_html=True)
 
 with tab2:
-    st.subheader("AI-Driven Predictive Analytics")
+    st.subheader("AI-Powered Predictive Insights")
     prediction = ai_predictor.predict(plant.state)
     col1, col2 = st.columns([3, 2])
     with col1:
@@ -252,22 +268,24 @@ with tab2:
         st.info(f"""
         **AI Directive:** {prediction["recommendation"]}  
         - Anomaly Status: {prediction['is_anomaly']}  
-        - Confidence: {min(95, max(50, 100 - prediction['risk_score'])):.0f}%
+        - Confidence: {min(98, max(60, 100 - prediction['risk_score'])):.0f}%  
+        - DeepNet Score: {ai_predictor._simulate_deep_learning(np.array([[plant.state['temperature'], plant.state['flow_rate'], plant.state['energy_usage']]])):.2f}
         """)
-        if st.button("🔧 Auto-Optimize", use_container_width=True):
-            with st.spinner("Executing AI optimization..."):
+        if st.button("🚀 Optimize Now", use_container_width=True):
+            with st.spinner("Deploying quantum optimization..."):
                 time.sleep(1.5)
-                st.success(f"Optimization success! Saved {np.random.uniform(10, 20):.1f}% energy")
+                st.success(f"Optimization complete! Efficiency gain: {np.random.uniform(15, 25):.1f}%")
 
 with tab3:
-    st.subheader("Operational Reports")
+    st.subheader("Advanced Analytics Export")
     def generate_report():
         pdf = FPDF()
         pdf.add_page()
         pdf.set_font("Arial", size=12)
-        pdf.cell(200, 10, txt="InoSense AI Operational Report", ln=1, align='C')
-        pdf.cell(200, 10, txt=f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M IST')}", ln=1)
-        pdf.cell(200, 10, txt=f"Risk Level: {plant.state['risk_score']:.1f}%", ln=1)
+        pdf.cell(200, 10, txt="InoSense AI Quantum Report", ln=1, align='C')
+        pdf.cell(200, 10, txt=f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M IST')}", ln=1)
+        pdf.cell(200, 10, txt=f"Risk Index: {plant.state['risk_score']:.1f}%", ln=1)
+        pdf.cell(200, 10, txt=f"AI Confidence: {min(98, max(60, 100 - prediction['risk_score'])):.0f}%", ln=2)
         qr = qrcode.QRCode(version=1, box_size=10, border=5)
         qr.add_data(f"InoSense Report - {datetime.now()}")
         qr.make(fit=True)
@@ -277,35 +295,29 @@ with tab3:
         return pdf.output(dest='S').encode('latin1')
 
     st.download_button(
-        label="📥 Download Report (PDF)",
+        label="📥 Export Quantum Report",
         data=generate_report(),
-        file_name=f"inosense_report_{datetime.now().strftime('%Y%m%d_%H%M')}.pdf",
+        file_name=f"inosense_quantum_report_{datetime.now().strftime('%Y%m%d_%H%M')}.pdf",
         mime="application/pdf"
     )
-    st.image("https://via.placeholder.com/800x400?text=AI+Trend+Forecast", caption="Predictive Trend Analysis")
+    st.image("https://via.placeholder.com/800x400?text=Quantum+Trend+Projection", caption="AI-Powered Future Trends")
 
-# Real-time update with polling
-refresh_placeholder = st.empty()
-while True:
-    with refresh_placeholder.container():
+# Real-time streaming with smooth updates
+def stream_data():
+    while True:
         plant.update()
-        with metrics_container.container():
-            col1, col2, col3, col4 = st.columns(4)
-            with col1:
-                st.metric("🌡️ Reactor Temp", f"{plant.state['temperature']:.1f}°K", f"{np.random.uniform(-2, 2):.1f}°C")
-            with col2:
-                st.metric("🔄 Flow Rate", f"{plant.state['flow_rate']:.1f} L/s", f"{np.random.uniform(-1, 1):.1f}%")
-            with col3:
-                st.metric("⚡ Energy Use", f"{plant.state['energy_usage']:.1f} MW", f"{np.random.uniform(-0.3, 0.3):.1f} MW")
-            with col4:
-                st.metric("⚠️ Risk Level", f"{'High' if plant.state['risk_score'] > 70 else 'Medium' if plant.state['risk_score'] > 30 else 'Low'}",
-                          f"{plant.state['risk_score']:.0f}%", delta_color="inverse")
-        time.sleep(2)  # Update every 2 seconds
+        update_metrics()
+        time.sleep(2)  # Stream every 2 seconds
 
-# Footer with engagement
+# Start streaming in a separate thread (simulated)
+if __name__ == "__main__":
+    stream_data()
+
+# Interactive footer with showcase
 st.divider()
-st.markdown("<h4 style='text-align: center; color: #00eaff;'>© 2025 InoSense AI | Pioneering Industrial Intelligence</h4>", unsafe_allow_html=True)
+st.markdown("<h4 style='text-align: center; color: #00ffcc; text-shadow: 0 0 15px #00ffcc;'>© 2025 InoSense AI | Redefining Industrial Intelligence</h4>", unsafe_allow_html=True)
 st.caption("""
-Built with Streamlit, scikit-learn, and Plotly  
-[GitHub](https://github.com/yourusername/inosense) | [Live Demo](your-app.streamlit.app) | [Connect](mailto:your.email@example.com)
+Developed by Varun | Tech Stack: Streamlit, scikit-learn, Plotly, Python  
+[GitHub](https://github.com/yourusername/inosense) | [Live Demo](https://inosense-xt2pxk8gveb5zvnm388qyu.streamlit.app/) | [Linkedin](https://www.linkedin.com/in/pappla-sai-varun-874902200/)  
+**Awards:** Finalist - AI Innovation Challenge 2025 | **Skills:** Full-Stack AI, Cloud Deployment
 """)
